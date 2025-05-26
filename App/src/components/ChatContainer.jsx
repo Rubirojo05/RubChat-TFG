@@ -6,10 +6,15 @@ import ChatInput from "./ChatInput"
 import Messages from "./Messages"
 import { useEffect, useState } from "react"
 import useAxiosRefresh from "../hooks/useAxiosRefresh"
+import { Settings } from "lucide-react"
+import { useNavigate } from "react-router-dom"
+import { useAuth } from "../hooks/useAuth"
 
 const ChatContainer = ({ currentChat, currentUser, socket }) => {
   const [messages, setMessages] = useState([])
   const axios = useAxiosRefresh()
+  const navigate = useNavigate()
+  const { auth } = useAuth()
 
   useEffect(() => {
     ; (async () => {
@@ -26,7 +31,7 @@ const ChatContainer = ({ currentChat, currentUser, socket }) => {
         (msg.idEmitor === currentChat.id && msg.idReceptor === currentUser.id) ||
         (msg.idEmitor === currentUser.id && msg.idReceptor === currentChat.id)
       ) {
-        setMessages((prevState) => [...prevState, msg]) // <-- ACTIVA ESTA LÍNEA
+        setMessages((prevState) => [...prevState, msg])
       }
     }
     socket.on("msg-receive", listener)
@@ -34,20 +39,6 @@ const ChatContainer = ({ currentChat, currentUser, socket }) => {
       socket.off("msg-receive", listener)
     }
   }, [socket, currentChat, currentUser])
-
-  const sendMessage = async (msg) => {
-    try {
-      const messagetoSend = {
-        idEmitor: currentUser.id,
-        idReceptor: currentChat.id,
-        content: msg,
-      }
-      const result = await axios.post("/message", messagetoSend)
-      //setMessages((prevState) => [...prevState, result.data])
-    } catch (err) {
-      console.error(err)
-    }
-  }
 
   return (
     <Container>
@@ -60,10 +51,31 @@ const ChatContainer = ({ currentChat, currentUser, socket }) => {
             <h3>{currentChat.firstName}</h3>
           </div>
         </div>
-        <Logout />
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          {auth?.roleId === 1 && (
+            <AdminButton
+              title="Panel de administración"
+              onClick={() => navigate("/admin")}
+            >
+              <Settings size={24} />
+            </AdminButton>
+          )}
+          <Logout />
+        </div>
       </div>
-      <Messages messages={messages} currentUser={currentUser} />
-      <ChatInput sendMessage={sendMessage} />
+      <Messages messages={messages} currentUser={currentUser} socket={socket} setMessages={setMessages} />
+      <ChatInput sendMessage={async (msg) => {
+        try {
+          const messagetoSend = {
+            idEmitor: currentUser.id,
+            idReceptor: currentChat.id,
+            content: msg,
+          }
+          await axios.post("/message", messagetoSend)
+        } catch (err) {
+          console.error(err)
+        }
+      }} />
     </Container>
   )
 }
@@ -95,7 +107,7 @@ const Container = styled.div`
             }
             .username {
                 h3 {
-                	color: #333;
+                    color: #333;
                 }
             }
         }
@@ -120,6 +132,24 @@ const Container = styled.div`
             }
         }
     }
+`
+
+const AdminButton = styled.button`
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  color: #555;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+    color: #333;
+  }
 `
 
 export default ChatContainer

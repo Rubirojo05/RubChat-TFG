@@ -1,6 +1,6 @@
 import express from 'express'
 import logger from 'morgan'
-import {config} from 'dotenv'
+import { config } from 'dotenv'
 import { userRouter } from './routes/user.router.js'
 import { messagesRouter } from './routes/messages.router.js'
 import { Server } from 'socket.io'
@@ -26,7 +26,7 @@ app.use(logger('dev'))
 app.use(cors(corsConfiguration()))
 
 const server = createServer(app)
-const io = new Server(server,{
+const io = new Server(server, {
     cors: corsConfiguration()
 })
 
@@ -35,17 +35,17 @@ let onlineUsers = new Map()
 
 // Autenticación de middleware
 io.use((socket, next) => {
-    if (socket.handshake.query && socket.handshake.query.accessToken){
+    if (socket.handshake.query && socket.handshake.query.accessToken) {
         const decode = decodeToken(socket.handshake.query.accessToken)
-        if(!decode) return next(new Error('Authentication error'))
+        if (!decode) return next(new Error('Authentication error'))
         socket.decoded = decode
         next()
 
     }
     else {
         next(new Error('Authentication error'));
-    }    
-    })
+    }
+})
     .on('connection', (socket) => {
         console.log('usuario conectado')
         // Añadir usuario a la lista de usuarios en línea
@@ -58,12 +58,13 @@ io.use((socket, next) => {
             onlineUsers.delete(socket.decoded.id)
             console.log(onlineUsers)
         })
-})
+    })
 
-app.use('/message',(req,res,next) => {
-    req.emitToSocket = (eventName, eventData) => {
-        const receptorId = req.body.idReceptor
-        const emisorId = req.body.idEmitor || req.id // req.id es el usuario autenticado
+app.use('/message', (req, res, next) => {
+    req.emitToSocket = (eventName, eventData, emisorId, receptorId) => {
+        // Si no se pasan, intenta obtenerlos del body (para compatibilidad)
+        emisorId = emisorId || req.body.idEmitor || req.id
+        receptorId = receptorId || req.body.idReceptor
         const receptorSocketId = onlineUsers.get(receptorId)
         const emisorSocketId = onlineUsers.get(emisorId)
         // Emitir al receptor
@@ -76,13 +77,13 @@ app.use('/message',(req,res,next) => {
         }
     }
     next()
-},messagesRouter)
+}, messagesRouter)
 
-app.use('/auth',authRouter)
-app.use('/user',userRouter)
+app.use('/auth', authRouter)
+app.use('/user', userRouter)
 
-app.use('*',errorHandler)
+app.use('*', errorHandler)
 
 const PORT = process.env.PORTAPI || 3000
 
-server.listen(PORT,()=>{console.log(`server running on port: ${PORT}`)})
+server.listen(PORT, () => { console.log(`server running on port: ${PORT}`) })

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import styled from "styled-components"
-import { Trash2, ArrowLeft, Check } from "lucide-react"
+import { Trash2, ArrowLeft, Check, Search } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 import { instancePrivate } from "../services/axios"
 import { useAuth } from "../hooks/useAuth"
@@ -17,6 +17,7 @@ const AdminPage = () => {
     const [editedRoles, setEditedRoles] = useState({})
     const [modalOpen, setModalOpen] = useState(false)
     const [userToDelete, setUserToDelete] = useState(null)
+    const [search, setSearch] = useState("")
     const { auth } = useAuth()
     const navigate = useNavigate()
 
@@ -89,61 +90,102 @@ const AdminPage = () => {
         setUpdating(null)
     }
 
-    return (
-        <Container>
-            <BackButton onClick={() => navigate("/chat")}>
-                <ArrowLeft size={20} style={{ marginRight: 8 }} />
-                Volver al chat
-            </BackButton>
-            <h1>Panel de Administración</h1>
-            <p>Gestiona los usuarios registrados en RubChat.</p>
-            {loading ? (
-                <Loading>Cargando usuarios...</Loading>
-            ) : (
-                <UserList>
-                    {users.map(user => (
-                        <UserCard key={user.id}>
-                            <Avatar src={user.img} alt={user.firstName} />
-                            <Name>{user.firstName}</Name>
-                            <RoleSelect
-                                value={editedRoles[user.id]}
-                                disabled={updating === user.id}
-                                onChange={e => handleRoleChange(user.id, e.target.value)}
-                            >
-                                {ROLES.map(role => (
-                                    <option key={role.id} value={role.id}>{role.name}</option>
-                                ))}
-                            </RoleSelect>
-                            {/* Solo muestra el botón si el rol ha cambiado */}
-                            {editedRoles[user.id] !== user.roleId && (
-                                <SaveBtn
-                                    title="Guardar cambios"
-                                    disabled={updating === user.id}
-                                    onClick={() => handleSaveRole(user.id)}
-                                >
-                                    <Check size={20} />
-                                </SaveBtn>
-                            )}
-                            <DeleteBtn
-                                title="Eliminar usuario"
-                                disabled={updating === user.id}
-                                onClick={() => openDeleteModal(user.id)}
-                            >
-                                <Trash2 size={20} />
-                            </DeleteBtn>
-                        </UserCard>
-                    ))}
-                </UserList>
-            )}
+    // Filtrado de usuarios según búsqueda
+    const filteredUsers = (() => {
+        if (!search.trim()) return users
+        const term = search.trim().toLowerCase()
+        return users.filter(
+            u =>
+                u.firstName?.toLowerCase().includes(term) ||
+                u.email?.toLowerCase().includes(term)
+        )
+    })()
 
-            <ConfirmModal
-                open={modalOpen}
-                onClose={() => setModalOpen(false)}
-                onConfirm={confirmDelete}
-                userName={userToDelete?.firstName}
-                updating={updating}
-            />
-        </Container>
+    return (
+        <PageWrapper>
+            <Header>
+                <h1>Panel de Administración</h1>
+                <p>Gestiona los usuarios registrados en RubChat.</p>
+            </Header>
+            <Container>
+                <BackButton onClick={() => navigate("/chat")}>
+                    <ArrowLeft size={20} style={{ marginRight: 8 }} />
+                    Volver al chat
+                </BackButton>
+                <SearchBar>
+                    <Search size={20} style={{ marginRight: 8, color: "#888" }} />
+                    <SearchInput
+                        type="text"
+                        placeholder="Buscar usuario..."
+                        value={search}
+                        onChange={e => setSearch(e.target.value)}
+                    />
+                </SearchBar>
+                {loading ? (
+                    <Loading>Cargando usuarios...</Loading>
+                ) : (
+                    <>
+                        {search.trim() && (
+                            filteredUsers.length > 0 ? (
+                                <Found>
+                                    {filteredUsers.length === 1
+                                        ? "1 usuario encontrado"
+                                        : `${filteredUsers.length} usuarios encontrados`}
+                                </Found>
+                            ) : (
+                                <NotFound>
+                                    Usuario no encontrado para "{search.trim()}"
+                                </NotFound>
+                            )
+                        )}
+                        {filteredUsers.length > 0 && (
+                            <UserList>
+                                {filteredUsers.map(user => (
+                                    <UserCard key={user.id}>
+                                        <Avatar src={user.img} alt={user.firstName} />
+                                        <Name>{user.firstName}</Name>
+                                        <Email>{user.email}</Email>
+                                        <RoleSelect
+                                            value={editedRoles[user.id]}
+                                            disabled={updating === user.id}
+                                            onChange={e => handleRoleChange(user.id, e.target.value)}
+                                        >
+                                            {ROLES.map(role => (
+                                                <option key={role.id} value={role.id}>{role.name}</option>
+                                            ))}
+                                        </RoleSelect>
+                                        {editedRoles[user.id] !== user.roleId && (
+                                            <SaveBtn
+                                                title="Guardar cambios"
+                                                disabled={updating === user.id}
+                                                onClick={() => handleSaveRole(user.id)}
+                                            >
+                                                <Check size={20} />
+                                            </SaveBtn>
+                                        )}
+                                        <DeleteBtn
+                                            title="Eliminar usuario"
+                                            disabled={updating === user.id}
+                                            onClick={() => openDeleteModal(user.id)}
+                                        >
+                                            <Trash2 size={20} />
+                                        </DeleteBtn>
+                                    </UserCard>
+                                ))}
+                            </UserList>
+                        )}
+                    </>
+                )}
+
+                <ConfirmModal
+                    open={modalOpen}
+                    onClose={() => setModalOpen(false)}
+                    onConfirm={confirmDelete}
+                    userName={userToDelete?.firstName}
+                    updating={updating}
+                />
+            </Container>
+        </PageWrapper>
     )
 }
 
@@ -160,7 +202,6 @@ const ConfirmModal = ({ open, onClose, onConfirm, userName, updating }) => {
                         Esta acción es irreversible <br />
                         Se eliminarán todos sus datos.
                     </DangerText>
-
                 </p>
                 <ModalActions>
                     <ModalButton onClick={onClose} disabled={!!updating}>Cancelar</ModalButton>
@@ -172,27 +213,77 @@ const ConfirmModal = ({ open, onClose, onConfirm, userName, updating }) => {
         </ModalOverlay>
     )
 }
+const PageWrapper = styled.div`
+  min-height: 100vh;
+  background: #fff;
+  padding: 2.5rem 0 2rem 0;
+  font-family: system-ui, sans-serif;
+`
+
+const Header = styled.div`
+  text-align: center;
+  margin-bottom: 2.5rem;
+  h1 {
+    font-size: 2.2rem;
+    color: #222;
+    margin-bottom: 0.3rem;
+    font-family: inherit;
+  }
+  p {
+    color: #444;
+    font-size: 1.1rem;
+    margin-bottom: 0;
+    font-family: inherit;
+  }
+`
 
 const Container = styled.div`
   max-width: 600px;
-  margin: 40px auto;
-  padding: 2.5rem 2rem;
+  margin: 0 auto;
+  padding: 2.5rem 2rem 2rem 2rem;
+  border-radius: 18px;
   background: #fff;
-  border-radius: 14px;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.07);
-  font-family: system-ui, sans-serif;
-  h1 {
-    font-size: 2rem;
-    margin-bottom: 0.5rem;
-    color: #222;
-    text-align: center;
-  }
-  p {
-    color: #666;
-    text-align: center;
-    margin-bottom: 2rem;
+  box-shadow: 0 6px 32px rgba(0,0,0,0.10), 0 1.5px 4px rgba(0,0,0,0.04);
+  font-family: inherit;
+`
+
+const Found = styled.div`
+  text-align: center;
+  color: #1abc9c;
+  font-size: 1.1rem;
+  margin-bottom: 1rem;
+`
+
+const SearchBar = styled.div`
+  display: flex;
+  align-items: center;
+  background: #f3f3f3;
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+  margin-bottom: 1.2rem;
+  margin-top: -0.5rem;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.03);
+  max-width: 340px;
+  width: 100%;
+  position: relative;
+  left: 50%;
+  transform: translateX(-50%);
+`
+
+const SearchInput = styled.input`
+  border: none;
+  background: transparent;
+  outline: none;
+  font-size: 1rem;
+  width: 100%;
+  color: #222;
+  font-family: inherit;
+  &::placeholder {
+    color: #aaa;
+    font-family: inherit;
   }
 `
+
 const DangerText = styled.span`
     color: #e74c3c;
     font-weight: 600;
@@ -211,7 +302,7 @@ const BackButton = styled.button`
   cursor: pointer;
   margin-bottom: 1.5rem;
   transition: background 0.18s, border 0.18s, color 0.18s;
-  font-family: system-ui, sans-serif;
+  font-family: inherit;
   &:hover {
     background: #f6f6f6;
     border: 1.5px solid #111;
@@ -250,6 +341,14 @@ const Name = styled.div`
   font-weight: 600;
   color: #222;
 `
+const Email = styled.div`
+  min-width: 140px;
+  color: #555;
+  font-size: 0.97rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+`
 
 const RoleSelect = styled.select`
   padding: 0.4rem 0.7rem;
@@ -259,6 +358,7 @@ const RoleSelect = styled.select`
   font-size: 1rem;
   color: #333;
   margin-right: 1rem;
+  font-family: inherit;
   &:disabled {
     opacity: 0.7;
   }
@@ -275,6 +375,7 @@ const SaveBtn = styled.button`
   display: flex;
   align-items: center;
   transition: background 0.15s;
+  font-family: inherit;
   &:hover {
     background: #16a085;
   }
@@ -292,6 +393,7 @@ const DeleteBtn = styled.button`
   border-radius: 6px;
   padding: 0.3rem 0.5rem;
   transition: background 0.15s;
+  font-family: inherit;
   &:hover {
     background: #ffeaea;
   }
@@ -306,6 +408,15 @@ const Loading = styled.div`
   color: #888;
   font-size: 1.1rem;
   margin-top: 2rem;
+  font-family: inherit;
+`
+
+const NotFound = styled.div`
+  text-align: center;
+  color: #c0392b;
+  font-size: 1.1rem;
+  margin-top: 2rem;
+  font-family: inherit;
 `
 
 // Modal styles
@@ -326,6 +437,7 @@ const ModalBox = styled.div`
     max-width: 350px;
     width: 100%;
     text-align: center;
+    font-family: inherit;
 `
 const ModalActions = styled.div`
     display: flex;
@@ -340,6 +452,7 @@ const ModalButton = styled.button`
     padding: 0.5rem 1.2rem;
     font-size: 1rem;
     cursor: pointer;
+    font-family: inherit;
     &:hover { background: #e3e6ee; }
     &:disabled { opacity: 0.6; cursor: not-allowed; }
 `

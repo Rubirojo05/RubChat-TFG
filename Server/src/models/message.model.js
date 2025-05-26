@@ -30,11 +30,12 @@ export class MessageModel {
         return result
     }
     async delete({ id }) {
-        const result = await pool.query('DELETE FROM messages WHERE id=?', [id])
+        // Borrado lógico: marca como eliminado
+        const result = await pool.query('UPDATE messages SET deleted=TRUE WHERE id=?', [id])
         return result
     }
     async deleteAllByUser({ id }) {
-        // Borra todos los mensajes donde el usuario sea emisor o receptor
+        // Solo para admin: borrado físico de todos los mensajes de un usuario
         return await pool.query('DELETE FROM messages WHERE idEmitor=? OR idReceptor=?', [id, id])
     }
     async update({ id, content, idUser }) {
