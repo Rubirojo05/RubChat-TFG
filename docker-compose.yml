@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  server:
+    build:
+      context: ./Server
+    ports:
+      - "3000:3000"
+    environment:
+      - PORTAPI=3000
+      - USER=${DB_USER}
+      - PASSWORD=${DB_PASSWORD}
+      - HOST=${DB_HOST}
+      - PORT=${DB_PORT}
+      - DATABASE=${DB_NAME}
+      - ACCESS_TOKEN_SECRET=${ACCESS_TOKEN_SECRET}
+      - REFRESH_TOKEN_SECRET=${REFRESH_TOKEN_SECRET}
+    depends_on:
+      - db
+
+  app:
+    build:
+      context: ./App
+    ports:
+      - "80:80"
+
+  db:
+    image: mysql:8
+    container_name: mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+
+volumes:
+  db_data:

@@ -1,0 +1,585 @@
+/* Reset CSS */
+.rubchat-container *,
+.rubchat-container *::before,
+.rubchat-container *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Base styles */
+.rubchat-container {
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif !important;
+    color: #333 !important;
+    line-height: 1.6 !important;
+    background-color: #fff !important;
+    width: 100% !important;
+    min-height: 100vh !important;
+    overflow-y: auto !important; /* Permitir desplazamiento vertical */
+    position: relative !important;
+    display: block !important;
+    margin-top: 1040px;
+  }
+
+  html, body, .rubchat-container {
+  overflow-x: hidden !important;
+}
+
+/* Header */
+.rubchat-header {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 80px !important; /* Altura fija del encabezado */
+    padding: 20px 10% !important;
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    background-color: rgba(255, 255, 255, 0.95) !important;
+    backdrop-filter: blur(10px) !important;
+    z-index: 1000 !important;
+    transition: all 0.3s ease !important;
+  }
+
+.rubchat-header.scrolled {
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1) !important;
+  padding: 15px 10% !important;
+}
+
+.rubchat-logo {
+  display: flex !important;
+  align-items: center !important;
+  font-size: 1.5rem !important;
+  font-weight: 700 !important;
+  color: #000 !important;
+}
+
+.rubchat-logo-text {
+  display: inline-block !important;
+}
+
+.rubchat-nav {
+  display: flex !important;
+  align-items: center !important;
+}
+
+.rubchat-nav-link {
+  text-decoration: none !important;
+  color: #555 !important;
+  font-weight: 500 !important;
+  padding: 10px 15px !important;
+  transition: color 0.3s ease !important;
+  display: inline-block !important;
+}
+
+.rubchat-nav-link:hover {
+  color: #000 !important;
+}
+
+.rubchat-login {
+  color: #000 !important;
+}
+
+.rubchat-register {
+  background-color: #000 !important;
+  color: white !important;
+  padding: 10px 20px !important;
+  border-radius: 30px !important;
+  transition: all 0.3s ease !important;
+}
+
+.rubchat-register:hover {
+  background-color: #333 !important;
+  color: white !important;
+}
+
+/* Hero Section */
+.rubchat-hero {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    padding: 100px 10% 100px !important; /* Reducir el padding superior */
+    min-height: calc(100vh - 80px) !important; /* Ajustar altura para evitar superposición */
+    background: linear-gradient(135deg, #ffffff 0%, #f5f5f5 100%) !important;
+    width: 100% !important;
+    margin-top: 80px; /* Compensar la altura del encabezado */
+  }
+
+  .rubchat-hero-content {
+    flex: 1 !important;
+    max-width: 550px !important;
+    overflow: visible !important;
+  }
+
+.rubchat-title {
+  font-size: 4.5rem !important;
+  font-weight: 800 !important;
+  margin-bottom: 20px !important;
+  color: #000 !important;
+  line-height: 1.2 !important;
+}
+
+.rubchat-typing-wrapper {
+  display: flex !important;
+  font-size: 1.5rem !important;
+  line-height: 1.6 !important;
+  margin-bottom: 20px !important;
+  color: #333 !important;
+  height: 40px !important;
+  align-items: center !important;
+}
+
+.rubchat-typing-static {
+  display: inline-block !important;
+}
+
+.rubchat-description {
+  font-size: 1.2rem !important;
+  line-height: 1.6 !important;
+  margin-bottom: 30px !important;
+  color: #555 !important;
+}
+
+.rubchat-buttons {
+  display: flex !important;
+  gap: 15px !important;
+}
+
+.rubchat-btn {
+  padding: 12px 24px !important;
+  border-radius: 30px !important;
+  font-size: 1rem !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  transition: all 0.3s ease !important;
+  border: none !important;
+  display: inline-block !important;
+  text-align: center !important;
+}
+
+.rubchat-primary {
+  background-color: #000 !important;
+  color: white !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
+}
+
+.rubchat-primary:hover {
+  background-color: #333 !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3) !important;
+}
+
+.rubchat-secondary {
+  background-color: transparent !important;
+  color: #000 !important;
+  border: 2px solid #000 !important;
+}
+
+.rubchat-secondary:hover {
+  background-color: rgba(0, 0, 0, 0.05) !important;
+  transform: translateY(-2px) !important;
+}
+
+.rubchat-hero-visual {
+  flex: 1 !important;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  position: relative !important;
+  min-height: 400px !important;
+}
+
+.rubchat-hero-visual::before {
+  content: "" !important;
+  position: absolute !important;
+  width: 300px !important;
+  height: 300px !important;
+  background: radial-gradient(circle, rgba(0, 0, 0, 0.03) 0%, rgba(0, 0, 0, 0) 70%) !important;
+  border-radius: 50% !important;
+  top: 60% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  z-index: -1 !important;
+}
+
+/* Features Section */
+.rubchat-features {
+  padding: 100px 10% !important;
+  text-align: center !important;
+  background-color: #fff !important;
+  width: 100% !important;
+}
+
+.rubchat-section-title {
+  font-size: 2.5rem !important;
+  margin-bottom: 60px !important;
+  color: #000 !important;
+  position: relative !important;
+  text-align: center !important;
+}
+
+.rubchat-section-title::after {
+  content: "" !important;
+  position: absolute !important;
+  bottom: -15px !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  width: 80px !important;
+  height: 4px !important;
+  background-color: #000 !important;
+  border-radius: 2px !important;
+}
+
+.rubchat-feature-list {
+  display: flex !important;
+  justify-content: space-between !important;
+  flex-wrap: wrap !important;
+  gap: 40px !important;
+}
+
+.rubchat-feature-item {
+  flex: 1 !important;
+  min-width: 250px !important;
+  padding: 30px !important;
+  background-color: #fff !important;
+  border-radius: 15px !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05) !important;
+  transition: transform 0.3s ease !important;
+}
+
+.rubchat-feature-item:hover {
+  transform: translateY(-10px) !important;
+}
+
+.rubchat-feature-icon {
+  width: 60px !important;
+  height: 60px !important;
+  background-color: rgba(0, 0, 0, 0.05) !important;
+  border-radius: 50% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  margin: 0 auto 20px !important;
+  color: #000 !important;
+}
+
+.rubchat-feature-title {
+  font-size: 1.3rem !important;
+  margin-bottom: 15px !important;
+  color: #000 !important;
+}
+
+.rubchat-feature-description {
+  color: #666 !important;
+  line-height: 1.6 !important;
+}
+
+/* Interactive Demo Section */
+.interactive-demo {
+  padding: 100px 10%;
+  background-color: #f9f9f9;
+  position: relative;
+  overflow: hidden;
+}
+
+.interactive-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 40px;
+}
+
+.interactive-text {
+  flex: 1;
+  min-width: 300px;
+}
+
+.interactive-text h3 {
+  font-size: 2rem;
+  margin-bottom: 20px;
+  color: var(--theme-color);
+}
+
+.interactive-text p {
+  font-size: 1.1rem;
+  line-height: 1.6;
+  margin-bottom: 30px;
+  color: #555;
+}
+
+.feature-list {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+.feature-list li {
+  display: flex;
+  align-items: center;
+  margin-bottom: 15px;
+  font-size: 1.1rem;
+}
+
+.feature-icon-small {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  margin-right: 10px;
+  font-size: 1.2rem;
+}
+
+.interactive-visual {
+  flex: 1;
+  min-width: 300px;
+  height: 300px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pulse-circle {
+  position: absolute;
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  background-color: rgba(var(--theme-color-rgb, 0, 0, 0), 0.05);
+  animation: pulse 3s infinite;
+}
+
+.pulse-circle.delay-1 {
+  animation-delay: 1s;
+}
+
+.pulse-circle.delay-2 {
+  animation-delay: 2s;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(0.5);
+    opacity: 0.5;
+  }
+  50% {
+    transform: scale(1.5);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(0.5);
+    opacity: 0.5;
+  }
+}
+
+/* How it works section */
+.how-it-works {
+  padding: 100px 10%;
+  background-color: #f9f9f9;
+}
+
+.steps-container {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 30px;
+  margin-top: 50px;
+}
+
+.step {
+  flex: 1;
+  min-width: 250px;
+  text-align: center;
+  padding: 30px;
+  background-color: white;
+  border-radius: 15px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+  transition: transform 0.3s ease;
+}
+
+.step:hover {
+  transform: translateY(-10px);
+}
+
+.step-number {
+  width: 50px;
+  height: 50px;
+  background-color: #000;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin: 0 auto 20px;
+}
+
+.step h3 {
+  font-size: 1.5rem;
+  margin-bottom: 15px;
+  color: #000;
+}
+
+.step p {
+  color: #666;
+  line-height: 1.6;
+}
+
+/* CTA Section */
+.rubchat-cta {
+  padding: 100px 10% !important;
+  background: linear-gradient(135deg, #000 0%, #333 100%) !important;
+  color: white !important;
+  text-align: center !important;
+  width: 100% !important;
+}
+
+.rubchat-cta-title {
+  font-size: 2.5rem !important;
+  margin-bottom: 20px !important;
+  color: white !important;
+}
+
+.rubchat-cta-description {
+  font-size: 1.2rem !important;
+  margin-bottom: 40px !important;
+  opacity: 0.9 !important;
+  max-width: 700px !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  color: white !important;
+}
+
+.rubchat-cta-buttons {
+  display: flex !important;
+  gap: 20px !important;
+  justify-content: center !important;
+}
+
+.rubchat-cta .rubchat-primary {
+  background-color: white !important;
+  color: #000 !important;
+}
+
+.rubchat-cta .rubchat-primary:hover {
+  background-color: #f5f5f5 !important;
+}
+
+.rubchat-light {
+  color: white !important;
+  border-color: white !important;
+}
+
+.rubchat-light:hover {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Animation for chat preview */
+.chat-preview {
+  padding: 20px;
+  width: 100%;
+}
+
+.chat-preview.animate .message-bubble {
+  opacity: 0;
+  transform: translateY(20px);
+  animation: fadeIn 0.5s forwards;
+}
+
+@keyframes fadeIn {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Footer */
+.rubchat-footer {
+  padding: 40px 10% !important;
+  background-color: #f9f9f9 !important;
+  text-align: center !important;
+  color: #777 !important;
+  width: 100% !important;
+}
+
+.rubchat-copyright {
+  font-size: 0.9rem !important;
+  color: #777 !important;
+}
+
+/* Responsive design */
+@media (max-width: 1024px) {
+  .rubchat-hero {
+    flex-direction: column !important;
+    text-align: center !important;
+    padding: 150px 5% 80px !important;
+    margin-top: 700px;
+  }
+
+  .rubchat-hero-content {
+    margin-bottom: 60px !important;
+    max-width: 100% !important;
+  }
+
+  .rubchat-buttons {
+    justify-content: center !important;
+  }
+
+  .rubchat-typing-wrapper {
+    justify-content: center !important;
+  }
+
+  .rubchat-feature-list {
+    flex-direction: column !important;
+    align-items: center !important;
+  }
+
+  .rubchat-feature-item {
+    max-width: 400px !important;
+    width: 100% !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .rubchat-header {
+    padding: 15px 5% !important;
+  }
+
+  .rubchat-nav-link {
+    padding: 10px 8px !important;
+  }
+
+  .rubchat-title {
+    font-size: 3.5rem !important;
+  }
+
+  .rubchat-cta-buttons {
+    flex-direction: column !important;
+    align-items: center !important;
+  }
+
+  .rubchat-btn {
+    width: 100% !important;
+    max-width: 300px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .rubchat-logo-text {
+    display: none !important;
+  }
+
+  .rubchat-nav-link {
+    padding: 8px 5px !important;
+    font-size: 0.9rem !important;
+  }
+
+  .rubchat-register {
+    padding: 8px 12px !important;
+  }
+}
