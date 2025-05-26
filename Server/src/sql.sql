@@ -32,16 +32,17 @@ CREATE TABLE
 
 #Se crea tabla de messages
 
-CREATE TABLE
-    messages(
-        id VARCHAR(36) not NULL,
-        content VARCHAR(255) NOT NULL,
-        date TIMESTAMP NOT NULL DEFAULT current_timestamp(),
-        idEmitor VARCHAR(36) not NULL,
-        idReceptor VARCHAR(36) not NULL,
-        PRIMARY KEY (id),
-        FOREIGN KEY (idEmitor) REFERENCES users(id)
-    ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;
+CREATE TABLE messages (
+    id VARCHAR(36) NOT NULL,
+    content VARCHAR(255) NOT NULL,
+    date TIMESTAMP NOT NULL DEFAULT current_timestamp(),
+    idEmitor VARCHAR(36) NOT NULL,
+    idReceptor VARCHAR(36) NOT NULL,
+    `read` BOOLEAN NOT NULL DEFAULT FALSE,
+    PRIMARY KEY (id),
+    FOREIGN KEY (idEmitor) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (idReceptor) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;
 
 INSERT INTO roles(id, name) VALUES(1, 'admin')
 

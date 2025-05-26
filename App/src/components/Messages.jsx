@@ -23,7 +23,7 @@ const Messages = ({ messages, currentUser }) => {
 
   return (
     <Container>
-      {messages ? (
+      {messages && messages.length > 0 ? (
         messages.map((message) => (
           <div
             ref={scroll}
@@ -42,7 +42,10 @@ const Messages = ({ messages, currentUser }) => {
           </div>
         ))
       ) : (
-        <h1>No hay mensajes</h1>
+        <EmptyState>
+          <h2>¡No hay mensajes aún!</h2>
+          <p>Escríbele un mensaje para iniciar la conversación 🚀</p>
+        </EmptyState>
       )}
     </Container>
   )
@@ -148,6 +151,29 @@ const Container = styled.div`
       width: 100%;
       min-width: 140px;
     }
+  }
+`
+
+const EmptyState = styled.div`
+  height: 100%;
+  min-height: 200px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #888;
+  text-align: center;
+  gap: 0.7rem;
+  h2 {
+    font-size: 1.3rem;
+    font-weight: 600;
+    margin-bottom: 0.2rem;
+    color: #444;
+  }
+  p {
+    font-size: 1.05rem;
+    color: #888;
+    margin: 0;
   }
 `
 

@@ -12,7 +12,7 @@ const ChatContainer = ({ currentChat, currentUser, socket }) => {
   const axios = useAxiosRefresh()
 
   useEffect(() => {
-    ;(async () => {
+    ; (async () => {
       const response = await axios.post("/message/user", { idReceptor: currentChat.id })
       setMessages(response?.data)
     })()
@@ -26,7 +26,7 @@ const ChatContainer = ({ currentChat, currentUser, socket }) => {
         (msg.idEmitor === currentChat.id && msg.idReceptor === currentUser.id) ||
         (msg.idEmitor === currentUser.id && msg.idReceptor === currentChat.id)
       ) {
-        setMessages((prevState) => [...prevState, msg])
+        setMessages((prevState) => [...prevState, msg]) // <-- ACTIVA ESTA LÍNEA
       }
     }
     socket.on("msg-receive", listener)
@@ -43,7 +43,7 @@ const ChatContainer = ({ currentChat, currentUser, socket }) => {
         content: msg,
       }
       const result = await axios.post("/message", messagetoSend)
-      setMessages((prevState) => [...prevState, result.data])
+      //setMessages((prevState) => [...prevState, result.data])
     } catch (err) {
       console.error(err)
     }

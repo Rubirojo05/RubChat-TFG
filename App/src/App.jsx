@@ -7,12 +7,14 @@ import { RequireAuth } from './components/RequireAuth'
 import styled from 'styled-components'
 import { Unauthorized } from './components/Unauthorized'
 import PersistLogin from './components/PersistLogin'
+import useAxiosRefresh from "./hooks/useAxiosRefresh"
 import Chat from './components/Chat'
 import Home from './components/Home'
 import Info from './components/Info'
+import AdminPage from './components/AdminPage'
 
 function App() {
-
+	useAxiosRefresh()
 
 	return (
 		<Container>
@@ -37,7 +39,7 @@ function App() {
 
 							{/* Rutas donde pueden ingresar admimintradores */}
 							<Route element={<RequireAuth allowedRoles={[1]} />}>
-
+								<Route path="/admin" element={<AdminPage />} />
 							</Route>
 						</Route>
 

@@ -19,7 +19,7 @@ export const Login = () => {
         e.preventDefault()
         try {
             const data = await loginWithAxios({ email, password })
-            updateAuthLogin({ accessToken: data })
+            updateAuthLogin({ accessToken: data.accessToken })
             navigate(from, { replace: true })
         } catch (err) {
             setError("Email o contraseña incorrectos")
@@ -31,7 +31,7 @@ export const Login = () => {
             <Card>
                 <InfoSection>
                     <InfoTitle>
-                        
+
                         ¿Qué puedes hacer iniciando sesión?
                     </InfoTitle>
                     <InfoList>
@@ -81,7 +81,7 @@ export const Login = () => {
                         </RegisterLink>
                     </form>
                     <BackHomeButton type="button" onClick={() => navigate("/")}>
-                        <ArrowLeft size={18} style={{marginRight: 6}} />
+                        <ArrowLeft size={18} style={{ marginRight: 6 }} />
                         Volver al inicio
                     </BackHomeButton>
                     {error && <ErrorMessage>{error}</ErrorMessage>}
