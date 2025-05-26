@@ -13,7 +13,6 @@ import { errorHandler } from './middleware/errorHandler.js'
 import path from 'path'
 import { decodeToken } from './utils/jwt.js'
 
-
 config()
 
 const app = express()
@@ -30,7 +29,6 @@ const io = new Server(server, {
     cors: corsConfiguration()
 })
 
-
 let onlineUsers = new Map()
 
 // Autenticación de middleware
@@ -40,7 +38,6 @@ io.use((socket, next) => {
         if (!decode) return next(new Error('Authentication error'))
         socket.decoded = decode
         next()
-
     }
     else {
         next(new Error('Authentication error'));
@@ -51,6 +48,14 @@ io.use((socket, next) => {
         // Añadir usuario a la lista de usuarios en línea
         onlineUsers.set(socket.decoded.id, socket.id)
         console.log(onlineUsers)
+
+        // --- Evento typing ---
+        socket.on('typing', ({ to, from, isTyping }) => {
+            const receptorSocketId = onlineUsers.get(to)
+            if (receptorSocketId) {
+                io.to(receptorSocketId).emit('typing', { from, isTyping })
+            }
+        })
 
         socket.on('disconnect', () => {
             console.log('usuario desconectado')

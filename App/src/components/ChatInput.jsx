@@ -7,7 +7,6 @@ import { useRef, useState } from "react"
 import { uploadImage, uploadAudio } from "../services/messageFiles"
 import { FaMicrophone, FaMusic } from "react-icons/fa"
 
-// Icono de imagen SVG
 const ImageIcon = () => (
   <svg width="24" height="24" fill="none" stroke="#555" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
     <rect x="3" y="3" width="18" height="18" rx="3" />
@@ -16,36 +15,38 @@ const ImageIcon = () => (
   </svg>
 )
 
-// Icono de subir archivo de audio (nota musical)
 const UploadAudioIcon = () => (
   <FaMusic size={24} color="#555" />
 )
 
-// Icono de grabar audio (micro gris o círculo rojo)
 const RecordIcon = ({ recording }) =>
   recording
     ? <svg width="24" height="24" viewBox="0 0 24 24" fill="#e74c3c" stroke="#e74c3c" strokeWidth="2"><circle cx="12" cy="12" r="10" /></svg>
     : <FaMicrophone size={24} color="#555" />
 
-const ChatInput = ({ sendMessage }) => {
+const ChatInput = ({ sendMessage, emitTyping }) => {
   const [showEmojiPiecker, setShowEmojiPiecker] = useState(false)
   const [msg, setMsg] = useState("")
   const [recording, setRecording] = useState(false)
   const [mediaRecorder, setMediaRecorder] = useState(null)
   const [audioChunks, setAudioChunks] = useState([])
   const inputRef = useRef()
+  const typingTimeout = useRef(null)
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     if (msg.trim() !== "") {
       sendMessage(msg)
       setMsg("")
+      if (emitTyping) emitTyping(false)
     }
   }
 
   const handleEmoji = (e) => {
     const message = inputRef.current.value + e.emoji
     setMsg(message)
+    if (emitTyping) emitTyping(true)
+    resetTypingTimeout()
   }
 
   const handleFileChange = async (e, type) => {
@@ -60,17 +61,17 @@ const ChatInput = ({ sendMessage }) => {
       sendMessage(url)
     }
     e.target.value = null // reset input
+    if (emitTyping) emitTyping(false)
   }
 
   // --- AUDIO POR MICRO ---
   const handleRecord = async () => {
     if (recording) {
-      // Detener grabación
       if (mediaRecorder) mediaRecorder.stop()
       setRecording(false)
+      if (emitTyping) emitTyping(false)
       return
     }
-    // Iniciar grabación
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
       const recorder = new window.MediaRecorder(stream)
@@ -80,7 +81,6 @@ const ChatInput = ({ sendMessage }) => {
       }
       recorder.onstop = async () => {
         const audioBlob = new Blob(chunks, { type: "audio/webm" })
-        // Subir a Cloudinary
         try {
           const url = await uploadAudio(new File([audioBlob], "audio.webm", { type: "audio/webm" }))
           sendMessage(url)
@@ -88,14 +88,32 @@ const ChatInput = ({ sendMessage }) => {
           alert("Error al subir el audio")
         }
         setAudioChunks([])
+        if (emitTyping) emitTyping(false)
       }
       setMediaRecorder(recorder)
       setAudioChunks(chunks)
       recorder.start()
       setRecording(true)
+      if (emitTyping) emitTyping(true)
+      resetTypingTimeout()
     } catch (err) {
       alert("No se pudo acceder al micrófono")
     }
+  }
+
+  // --- Emitir typing al escribir ---
+  const handleInputChange = (e) => {
+    setMsg(e.target.value)
+    if (emitTyping) emitTyping(true)
+    resetTypingTimeout()
+  }
+
+  // --- Timeout para dejar de escribir ---
+  const resetTypingTimeout = () => {
+    if (typingTimeout.current) clearTimeout(typingTimeout.current)
+    typingTimeout.current = setTimeout(() => {
+      if (emitTyping) emitTyping(false)
+    }, 1500)
   }
 
   return (
@@ -109,7 +127,7 @@ const ChatInput = ({ sendMessage }) => {
           placeholder="Escribe un mensaje..."
           ref={inputRef}
           type="text"
-          onChange={(e) => setMsg(e.target.value)}
+          onChange={handleInputChange}
           value={msg}
         />
         <input

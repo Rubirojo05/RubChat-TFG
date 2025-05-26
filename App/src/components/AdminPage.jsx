@@ -154,22 +154,25 @@ const AdminPage = () => {
                                                 <option key={role.id} value={role.id}>{role.name}</option>
                                             ))}
                                         </RoleSelect>
-                                        {editedRoles[user.id] !== user.roleId && (
+                                        <Actions>
                                             <SaveBtn
                                                 title="Guardar cambios"
                                                 disabled={updating === user.id}
                                                 onClick={() => handleSaveRole(user.id)}
+                                                style={{
+                                                    visibility: editedRoles[user.id] !== user.roleId ? "visible" : "hidden"
+                                                }}
                                             >
                                                 <Check size={20} />
                                             </SaveBtn>
-                                        )}
-                                        <DeleteBtn
-                                            title="Eliminar usuario"
-                                            disabled={updating === user.id}
-                                            onClick={() => openDeleteModal(user.id)}
-                                        >
-                                            <Trash2 size={20} />
-                                        </DeleteBtn>
+                                            <DeleteBtn
+                                                title="Eliminar usuario"
+                                                disabled={updating === user.id}
+                                                onClick={() => openDeleteModal(user.id)}
+                                            >
+                                                <Trash2 size={20} />
+                                            </DeleteBtn>
+                                        </Actions>
                                     </UserCard>
                                 ))}
                             </UserList>
@@ -324,6 +327,7 @@ const UserCard = styled.div`
   border-radius: 10px;
   padding: 0.7rem 1.2rem;
   box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  overflow: hidden; /* Añadido para evitar desbordes */
 `
 
 const Avatar = styled.img`
@@ -336,13 +340,18 @@ const Avatar = styled.img`
 `
 
 const Name = styled.div`
-  flex: 1;
+  flex: 1 1 120px;
   font-size: 1.15rem;
   font-weight: 600;
   color: #222;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 `
 const Email = styled.div`
-  min-width: 140px;
+  min-width: 100px;
+  max-width: 160px;
   color: #555;
   font-size: 0.97rem;
   overflow: hidden;
@@ -439,6 +448,13 @@ const ModalBox = styled.div`
     text-align: center;
     font-family: inherit;
 `
+const Actions = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+  margin-left: auto;
+`
+
 const ModalActions = styled.div`
     display: flex;
     justify-content: flex-end;

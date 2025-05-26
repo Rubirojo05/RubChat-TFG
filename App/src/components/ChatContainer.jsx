@@ -4,7 +4,7 @@ import styled from "styled-components"
 import Logout from "./Logout"
 import ChatInput from "./ChatInput"
 import Messages from "./Messages"
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef } from "react"
 import useAxiosRefresh from "../hooks/useAxiosRefresh"
 import { Settings } from "lucide-react"
 import { useNavigate } from "react-router-dom"
@@ -12,10 +12,13 @@ import { useAuth } from "../hooks/useAuth"
 
 const ChatContainer = ({ currentChat, currentUser, socket }) => {
   const [messages, setMessages] = useState([])
+  const [isTyping, setIsTyping] = useState(false)
+  const typingTimeout = useRef(null)
   const axios = useAxiosRefresh()
   const navigate = useNavigate()
   const { auth } = useAuth()
 
+  // Escuchar mensajes
   useEffect(() => {
     ; (async () => {
       const response = await axios.post("/message/user", { idReceptor: currentChat.id })
@@ -23,10 +26,10 @@ const ChatContainer = ({ currentChat, currentUser, socket }) => {
     })()
   }, [currentChat])
 
+  // Escuchar mensajes recibidos
   useEffect(() => {
     if (!socket) return
     const listener = (msg) => {
-      // Solo añade el mensaje si es para este chat abierto
       if (
         (msg.idEmitor === currentChat.id && msg.idReceptor === currentUser.id) ||
         (msg.idEmitor === currentUser.id && msg.idReceptor === currentChat.id)
@@ -40,6 +43,36 @@ const ChatContainer = ({ currentChat, currentUser, socket }) => {
     }
   }, [socket, currentChat, currentUser])
 
+  // --- Escuchar typing del otro usuario ---
+  useEffect(() => {
+    if (!socket) return
+    const handleTyping = ({ from, isTyping }) => {
+      if (from === currentChat.id) {
+        setIsTyping(isTyping)
+        if (isTyping) {
+          if (typingTimeout.current) clearTimeout(typingTimeout.current)
+          typingTimeout.current = setTimeout(() => setIsTyping(false), 2500)
+        }
+      }
+    }
+    socket.on("typing", handleTyping)
+    return () => {
+      socket.off("typing", handleTyping)
+      if (typingTimeout.current) clearTimeout(typingTimeout.current)
+    }
+  }, [socket, currentChat])
+
+  // --- Función para emitir typing ---
+  const emitTyping = (typing) => {
+    if (socket && currentChat && currentUser) {
+      socket.emit("typing", {
+        to: currentChat.id,
+        from: currentUser.id,
+        isTyping: typing
+      })
+    }
+  }
+
   return (
     <Container>
       <div className="chat-header">
@@ -47,8 +80,11 @@ const ChatContainer = ({ currentChat, currentUser, socket }) => {
           <div className="avatar">
             <img src={currentChat.img || "/placeholder.svg"} alt="" />
           </div>
-          <div className="username">
+          <div className="username-row">
             <h3>{currentChat.firstName}</h3>
+            {isTyping && (
+              <TypingIndicator>Escribiendo...</TypingIndicator>
+            )}
           </div>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
@@ -64,18 +100,21 @@ const ChatContainer = ({ currentChat, currentUser, socket }) => {
         </div>
       </div>
       <Messages messages={messages} currentUser={currentUser} socket={socket} setMessages={setMessages} />
-      <ChatInput sendMessage={async (msg) => {
-        try {
-          const messagetoSend = {
-            idEmitor: currentUser.id,
-            idReceptor: currentChat.id,
-            content: msg,
+      <ChatInput
+        sendMessage={async (msg) => {
+          try {
+            const messagetoSend = {
+              idEmitor: currentUser.id,
+              idReceptor: currentChat.id,
+              content: msg,
+            }
+            await axios.post("/message", messagetoSend)
+          } catch (err) {
+            console.error(err)
           }
-          await axios.post("/message", messagetoSend)
-        } catch (err) {
-          console.error(err)
-        }
-      }} />
+        }}
+        emitTyping={emitTyping}
+      />
     </Container>
   )
 }
@@ -105,9 +144,15 @@ const Container = styled.div`
                     object-fit: cover;
                 }
             }
-            .username {
+            .username-row {
+                display: flex;
+                align-items: center;
+                gap: 0.7rem;
                 h3 {
                     color: #333;
+                    margin: 0;
+                    font-size: 1.15rem;
+                    font-weight: 600;
                 }
             }
         }
@@ -116,22 +161,32 @@ const Container = styled.div`
     @media screen and (max-width: 768px) {
         .chat-header {
             padding: 0 1rem;
-            padding-left: 3.5rem; /* Make space for the mobile toggle button */
-            
+            padding-left: 3.5rem;
             .user-details {
                 gap: 0.5rem;
-                
                 .avatar img {
                     height: 2.5rem;
                     width: 2.5rem;
                 }
-                
-                .username h3 {
+                .username-row h3 {
                     font-size: 0.9rem;
                 }
             }
         }
     }
+`
+
+const TypingIndicator = styled.div`
+  font-size: 0.97rem;
+  color: #1abc9c;
+  font-style: italic;
+  margin-left: 10px;
+  animation: blink 1.2s infinite;
+  white-space: nowrap;
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+  }
 `
 
 const AdminButton = styled.button`
