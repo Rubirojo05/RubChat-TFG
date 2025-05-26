@@ -143,36 +143,40 @@ const AdminPage = () => {
                                 {filteredUsers.map(user => (
                                     <UserCard key={user.id}>
                                         <Avatar src={user.img} alt={user.firstName} />
-                                        <Name>{user.firstName}</Name>
-                                        <Email>{user.email}</Email>
-                                        <RoleSelect
-                                            value={editedRoles[user.id]}
-                                            disabled={updating === user.id}
-                                            onChange={e => handleRoleChange(user.id, e.target.value)}
-                                        >
-                                            {ROLES.map(role => (
-                                                <option key={role.id} value={role.id}>{role.name}</option>
-                                            ))}
-                                        </RoleSelect>
-                                        <Actions>
-                                            <SaveBtn
-                                                title="Guardar cambios"
+                                        <UserInfo>
+                                            <Name>{user.firstName}</Name>
+                                            <Email>{user.email}</Email>
+                                        </UserInfo>
+                                        <Controls>
+                                            <RoleSelect
+                                                value={editedRoles[user.id]}
                                                 disabled={updating === user.id}
-                                                onClick={() => handleSaveRole(user.id)}
-                                                style={{
-                                                    visibility: editedRoles[user.id] !== user.roleId ? "visible" : "hidden"
-                                                }}
+                                                onChange={e => handleRoleChange(user.id, e.target.value)}
                                             >
-                                                <Check size={20} />
-                                            </SaveBtn>
-                                            <DeleteBtn
-                                                title="Eliminar usuario"
-                                                disabled={updating === user.id}
-                                                onClick={() => openDeleteModal(user.id)}
-                                            >
-                                                <Trash2 size={20} />
-                                            </DeleteBtn>
-                                        </Actions>
+                                                {ROLES.map(role => (
+                                                    <option key={role.id} value={role.id}>{role.name}</option>
+                                                ))}
+                                            </RoleSelect>
+                                            <Actions>
+                                                <SaveBtn
+                                                    title="Guardar cambios"
+                                                    disabled={updating === user.id}
+                                                    onClick={() => handleSaveRole(user.id)}
+                                                    style={{
+                                                        visibility: editedRoles[user.id] !== user.roleId ? "visible" : "hidden"
+                                                    }}
+                                                >
+                                                    <Check size={20} />
+                                                </SaveBtn>
+                                                <DeleteBtn
+                                                    title="Eliminar usuario"
+                                                    disabled={updating === user.id}
+                                                    onClick={() => openDeleteModal(user.id)}
+                                                >
+                                                    <Trash2 size={20} />
+                                                </DeleteBtn>
+                                            </Actions>
+                                        </Controls>
                                     </UserCard>
                                 ))}
                             </UserList>
@@ -248,6 +252,10 @@ const Container = styled.div`
   background: #fff;
   box-shadow: 0 6px 32px rgba(0,0,0,0.10), 0 1.5px 4px rgba(0,0,0,0.04);
   font-family: inherit;
+  @media (max-width: 600px) {
+    padding: 1.2rem 0.5rem;
+    max-width: 99vw;
+  }
 `
 
 const Found = styled.div`
@@ -327,7 +335,13 @@ const UserCard = styled.div`
   border-radius: 10px;
   padding: 0.7rem 1.2rem;
   box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-  overflow: hidden; /* Añadido para evitar desbordes */
+  overflow: hidden;
+  @media (max-width: 600px) {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.7rem;
+    padding: 0.7rem 0.5rem;
+  }
 `
 
 const Avatar = styled.img`
@@ -337,10 +351,25 @@ const Avatar = styled.img`
   object-fit: cover;
   border: 2px solid #e3e6ee;
   background: #fff;
+  @media (max-width: 600px) {
+    margin: 0 auto;
+    width: 40px;
+    height: 40px;
+  }
 `
 
-const Name = styled.div`
+const UserInfo = styled.div`
   flex: 1 1 120px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  @media (max-width: 600px) {
+    align-items: center;
+    text-align: center;
+  }
+`
+const Name = styled.div`
   font-size: 1.15rem;
   font-weight: 600;
   color: #222;
@@ -357,6 +386,22 @@ const Email = styled.div`
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  @media (max-width: 600px) {
+    max-width: 100vw;
+    font-size: 0.9rem;
+  }
+`
+
+const Controls = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  @media (max-width: 600px) {
+    flex-direction: column;
+    gap: 0.3rem;
+    align-items: stretch;
+    width: 100%;
+  }
 `
 
 const RoleSelect = styled.select`
@@ -370,6 +415,22 @@ const RoleSelect = styled.select`
   font-family: inherit;
   &:disabled {
     opacity: 0.7;
+  }
+  @media (max-width: 600px) {
+    margin-right: 0;
+    width: 100%;
+  }
+`
+
+const Actions = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+  margin-left: auto;
+  @media (max-width: 600px) {
+    margin-left: 0;
+    justify-content: center;
+    width: 100%;
   }
 `
 
@@ -392,6 +453,11 @@ const SaveBtn = styled.button`
     opacity: 0.5;
     cursor: not-allowed;
   }
+  @media (max-width: 600px) {
+    margin-right: 0;
+    width: 100%;
+    justify-content: center;
+  }
 `
 
 const DeleteBtn = styled.button`
@@ -409,6 +475,10 @@ const DeleteBtn = styled.button`
   &:disabled {
     opacity: 0.5;
     cursor: not-allowed;
+  }
+  @media (max-width: 600px) {
+    width: 100%;
+    justify-content: center;
   }
 `
 
@@ -448,13 +518,6 @@ const ModalBox = styled.div`
     text-align: center;
     font-family: inherit;
 `
-const Actions = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 0.2rem;
-  margin-left: auto;
-`
-
 const ModalActions = styled.div`
     display: flex;
     justify-content: flex-end;

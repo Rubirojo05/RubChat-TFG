@@ -130,30 +130,32 @@ const ChatInput = ({ sendMessage, emitTyping }) => {
           onChange={handleInputChange}
           value={msg}
         />
-        <input
-          type="file"
-          accept="image/*"
-          id="image-upload"
-          style={{ display: "none" }}
-          onChange={e => handleFileChange(e, "image")}
-        />
-        <label htmlFor="image-upload" className="icon">
-          <ImageIcon />
-        </label>
-        <input
-          type="file"
-          accept="audio/*"
-          id="audio-upload"
-          style={{ display: "none" }}
-          onChange={e => handleFileChange(e, "audio")}
-        />
-        <label htmlFor="audio-upload" className="icon" title="Subir audio">
-          <UploadAudioIcon />
-        </label>
-        <div className="icon" onClick={handleRecord} title={recording ? "Detener grabación" : "Grabar audio"}>
-          <RecordIcon recording={recording} />
+        <div className="icons-group">
+          <input
+            type="file"
+            accept="image/*"
+            id="image-upload"
+            style={{ display: "none" }}
+            onChange={e => handleFileChange(e, "image")}
+          />
+          <label htmlFor="image-upload" className="icon">
+            <ImageIcon />
+          </label>
+          <input
+            type="file"
+            accept="audio/*"
+            id="audio-upload"
+            style={{ display: "none" }}
+            onChange={e => handleFileChange(e, "audio")}
+          />
+          <label htmlFor="audio-upload" className="icon" title="Subir audio">
+            <UploadAudioIcon />
+          </label>
+          <div className="icon" onClick={handleRecord} title={recording ? "Detener grabación" : "Grabar audio"}>
+            <RecordIcon recording={recording} />
+          </div>
         </div>
-        <button type="submit">
+        <button type="submit" className="send-btn">
           <SendIcons />
         </button>
       </form>
@@ -166,14 +168,13 @@ const Container = styled.div`
     justify-content: center;
     width: 100%;
     form {
-        display: grid;
+        display: flex;
         align-items: center;
-        justify-content: space-around;
-        grid-template-columns: 5% 70% 5% 5% 5% 5% 5%;
         width: 100%;
-        height: 100%;
         background-color: #f0f0f0;
         position: relative;
+        padding: 0.5rem 0.7rem;
+        gap: 0.5rem;
         .icon {
             display: flex;
             justify-content: center;
@@ -183,12 +184,14 @@ const Container = styled.div`
             border-radius: 1rem;
             transition: background 0.2s;
             padding: 0.2rem;
+            min-width: 36px;
+            min-height: 36px;
         }
         .icon:hover {
             background-color: rgba(0, 0, 0, 0.07);
         }
         input[type="text"] {
-            height: 60%;
+            flex: 1;
             border-radius: 2rem;
             font-size: 1.2rem;
             padding-left: 1rem;
@@ -196,38 +199,79 @@ const Container = styled.div`
             background-color: #ffffff;
             color: #333;
             border: 1px solid #e0e0e0;
+            height: 40px;
         }
         ::placeholder { color: #999 }
         .EmojiPickerReact {
             position: absolute;
-            bottom: 80px;
+            bottom: 60px;
             left: 0;
             z-index: 10;
         }
-        button {
-            width: 100%;
-            height: 60%;
-            border-radius: 2rem;
+        .icons-group {
+            display: flex;
+            align-items: center;
+            gap: 0.2rem;
+        }
+        .send-btn {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
             background-color: #333;
             border: none;
             cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: 0.2rem;
             svg {
-                width: 100%;
-                height: 60%;
+                width: 24px;
+                height: 24px;
             }
         }
-        button:hover {
+        .send-btn:hover {
             background-color: #555;
         }
-        svg {
-            width: 80%;
-            height: 60%;
-        }
-        
         @media screen and (max-width: 768px) {
-            grid-template-columns: 10% 60% 10% 10% 10% 10% 10%;
+            padding: 0.3rem 0.2rem;
+            gap: 0.2rem;
+            .icons-group {
+                gap: 0.1rem;
+            }
+            .icon {
+                min-width: 32px;
+                min-height: 32px;
+                padding: 0.1rem;
+            }
             input[type="text"] {
                 font-size: 1rem;
+                height: 36px;
+                padding-left: 0.7rem;
+                padding-right: 0.7rem;
+            }
+            .send-btn {
+                width: 38px;
+                height: 38px;
+                svg {
+                    width: 20px;
+                    height: 20px;
+                }
+            }
+        }
+        @media screen and (max-width: 480px) {
+            .icons-group {
+                .icon {
+                    display: none;
+                }
+                /* Mostramos solo el icono de imagen y el de grabar audio */
+                label[for="image-upload"].icon,
+                .icon:last-child {
+                    display: flex;
+                }
+            }
+            .icon, .send-btn {
+                min-width: 32px;
+                min-height: 32px;
             }
         }
     }
