@@ -180,17 +180,18 @@ const ChatContainer = ({ currentChat, currentUser, socket, onlineUsers = [] }) =
 }
 
 const Container = styled.div`
-  display: grid;
-  grid-template-rows: 70px 1fr 80px;
-  background-color: white;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  display: flex;
+  flex-direction: column;
   height: 100%;
   min-height: 0;
   min-width: 0;
+  background-color: white;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   overflow: hidden;
   position: relative;
 
   .chat-header {
+    flex: 0 0 auto;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -203,6 +204,7 @@ const Container = styled.div`
     position: sticky;
     top: 0;
     z-index: 2;
+    transition: all 0.2s;
     .user-details{
       display: flex;
       align-items: center;
@@ -214,7 +216,7 @@ const Container = styled.div`
           width: 3rem;
           border-radius: 50%;
           object-fit: cover;
-          transition: box-shadow 0.18s;
+          transition: box-shadow 0.18s, height 0.18s, width 0.18s;
         }
         img:hover {
           box-shadow: 0 0 0 3px #bbb;
@@ -247,42 +249,42 @@ const Container = styled.div`
   }
 
   .messages-area {
+    flex: 1 1 0;
     min-height: 0;
     height: 100%;
     overflow-y: auto;
-    /* Para que el área de mensajes ocupe el espacio restante y haga scroll */
     display: flex;
     flex-direction: column;
+    background: #f9f9f9;
   }
 
   .chat-input-container {
+    flex: 0 0 auto;
     position: sticky;
     bottom: 0;
     z-index: 2;
     background: white;
-    /* Para evitar que el input se mueva al hacer scroll */
   }
 
-  @media screen and (max-width: 768px) {
-    grid-template-rows: 56px 1fr 62px;
-    min-width: 0;
-    min-height: 0;
+  /* --- PORTÁTIL Y TABLET --- */
+  @media screen and (max-width: 900px) and (min-width: 481px) {
     .chat-header {
-      padding: 0 0.7rem;
-      min-height: 56px;
-      max-height: 70px;
+      margin-top: 0;
+      min-height: 70px;
+      max-height: 90px;
+      padding: 0 1rem;
       .user-details {
-        gap: 0.5rem;
+        gap: 0.7rem;
         .avatar img {
-          height: 2.1rem;
-          width: 2.1rem;
+          height: 2.3rem;
+          width: 2.3rem;
         }
         .username-row h3 {
-          font-size: 0.97rem;
+          font-size: 1.05rem;
         }
       }
       .header-actions {
-        gap: 4px;
+        gap: 6px;
         button, .logout-btn {
           padding: 0.3rem 0.5rem !important;
           svg {
@@ -292,20 +294,16 @@ const Container = styled.div`
         }
       }
     }
-    .chat-header, .header-actions, .user-details, .username-row {
-      min-width: 0;
-      max-width: 100vw;
-      overflow-x: auto;
-    }
     .chat-input-container {
       min-height: 62px;
       max-height: 80px;
     }
   }
 
+  /* --- MÓVIL --- */
   @media screen and (max-width: 480px) {
-    grid-template-rows: 48px 1fr 54px;
     .chat-header {
+      margin-top: 0;
       padding: 0 0.1rem;
       min-height: 48px;
       max-height: 60px;
@@ -329,11 +327,6 @@ const Container = styled.div`
           }
         }
       }
-    }
-    .chat-header, .header-actions, .user-details, .username-row {
-      min-width: 0;
-      max-width: 100vw;
-      overflow-x: auto;
     }
     .chat-input-container {
       min-height: 54px;

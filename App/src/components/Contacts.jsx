@@ -297,6 +297,17 @@ const Container = styled.div`
             }
         }
     }
+
+    @media screen and (max-width: 900px) and (min-width: 481px) {
+      /* Baja la barra de búsqueda y la lista de contactos un poco */
+      padding-top: 32px;
+      .contacts {
+        padding-top: 1.5rem;
+      }
+      .current-user {
+        margin-top: 2rem;
+      }
+    }
     
     @media screen and (min-width: 769px) and (max-width: 1080px) {
         .current-user {

@@ -255,6 +255,15 @@ const Container = styled.div`
             grid-template-columns: 1.5fr 2.5fr;
         }
         
+        @media screen and (max-width: 900px) and (min-width: 481px) {
+            grid-template-columns: 1fr 2fr;
+            /* Asegura que el header del chat se vea bien */
+            .chat-wrapper {
+                grid-column: 2;
+                height: 100%;
+            }
+        }
+
         @media screen and (max-width: 768px) {
             grid-template-columns: 1fr;
             
