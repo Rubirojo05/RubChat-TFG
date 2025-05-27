@@ -145,22 +145,26 @@ const ChatContainer = ({ currentChat, currentUser, socket, onlineUsers = [] }) =
           <Logout />
         </div>
       </div>
-      <Messages messages={messages} currentUser={currentUser} socket={socket} setMessages={setMessages} />
-      <ChatInput
-        sendMessage={async (msg) => {
-          try {
-            const messagetoSend = {
-              idEmitor: currentUser.id,
-              idReceptor: currentChat.id,
-              content: msg,
+      <div className="messages-area">
+        <Messages messages={messages} currentUser={currentUser} socket={socket} setMessages={setMessages} />
+      </div>
+      <div className="chat-input-container">
+        <ChatInput
+          sendMessage={async (msg) => {
+            try {
+              const messagetoSend = {
+                idEmitor: currentUser.id,
+                idReceptor: currentChat.id,
+                content: msg,
+              }
+              await axios.post("/message", messagetoSend)
+            } catch (err) {
+              console.error(err)
             }
-            await axios.post("/message", messagetoSend)
-          } catch (err) {
-            console.error(err)
-          }
-        }}
-        emitTyping={emitTyping}
-      />
+          }}
+          emitTyping={emitTyping}
+        />
+      </div>
       {modalImg && (
         <ModalOverlay className="modal-overlay" onClick={handleModalClose}>
           <ModalImg
@@ -176,139 +180,166 @@ const ChatContainer = ({ currentChat, currentUser, socket, onlineUsers = [] }) =
 }
 
 const Container = styled.div`
-    display: grid;
-    grid-template-rows: 70px 1fr 80px;
-    background-color: white;
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-    height: 100%;
-    min-height: 0;
-    min-width: 0;
-    overflow: hidden;
+  display: grid;
+  grid-template-rows: 70px 1fr 80px;
+  background-color: white;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  height: 100%;
+  min-height: 0;
+  min-width: 0;
+  overflow: hidden;
+  position: relative;
 
-    .chat-header {
+  .chat-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 2rem;
+    background-color: #f0f0f0;
+    border-bottom: 1px solid #ddd;
+    min-height: 70px;
+    max-height: 90px;
+    box-sizing: border-box;
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    .user-details{
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      min-width: 0;
+      .avatar {
+        img {
+          height: 3rem;
+          width: 3rem;
+          border-radius: 50%;
+          object-fit: cover;
+          transition: box-shadow 0.18s;
+        }
+        img:hover {
+          box-shadow: 0 0 0 3px #bbb;
+        }
+      }
+      .username-row {
         display: flex;
-        justify-content: space-between;
         align-items: center;
-        padding: 0 2rem;
-        background-color: #f0f0f0;
-        border-bottom: 1px solid #ddd;
-        min-height: 70px;
-        max-height: 90px;
-        box-sizing: border-box;
-        .user-details{
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            min-width: 0;
-            .avatar {
-                img {
-                    height: 3rem;
-                    width: 3rem;
-                    border-radius: 50%;
-                    object-fit: cover;
-                    transition: box-shadow 0.18s;
-                }
-                img:hover {
-                    box-shadow: 0 0 0 3px #bbb;
-                }
-            }
-            .username-row {
-                display: flex;
-                align-items: center;
-                gap: 0.7rem;
-                min-width: 0;
-                h3 {
-                    color: #333;
-                    margin: 0;
-                    font-size: 1.15rem;
-                    font-weight: 600;
-                    min-width: 0;
-                    overflow: hidden;
-                    text-overflow: ellipsis;
-                    white-space: nowrap;
-                }
-            }
-        }
-        .header-actions {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            min-width: 0;
-            flex-shrink: 0;
-        }
-    }
-
-    @media screen and (max-width: 768px) {
-        grid-template-rows: 56px 1fr 62px;
+        gap: 0.7rem;
         min-width: 0;
-        min-height: 0;
-        .chat-header {
-            padding: 0 0.7rem;
-            min-height: 56px;
-            max-height: 70px;
-            .user-details {
-                gap: 0.5rem;
-                .avatar img {
-                    height: 2.1rem;
-                    width: 2.1rem;
-                }
-                .username-row h3 {
-                    font-size: 0.97rem;
-                }
-            }
-            .header-actions {
-                gap: 4px;
-                button, .logout-btn {
-                    padding: 0.3rem 0.5rem !important;
-                    svg {
-                        width: 20px !important;
-                        height: 20px !important;
-                    }
-                }
-            }
+        h3 {
+          color: #333;
+          margin: 0;
+          font-size: 1.15rem;
+          font-weight: 600;
+          min-width: 0;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
         }
-        /* Ajuste para el input y el footer del chat */
-        .chat-header, .header-actions, .user-details, .username-row {
-            min-width: 0;
-            max-width: 100vw;
-            overflow-x: auto;
-        }
+      }
     }
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+      flex-shrink: 0;
+    }
+  }
 
-    @media screen and (max-width: 480px) {
-        grid-template-rows: 48px 1fr 54px;
-        .chat-header {
-            padding: 0 0.1rem;
-            min-height: 48px;
-            max-height: 60px;
-            .user-details {
-                gap: 0.2rem;
-                .avatar img {
-                    height: 1.5rem;
-                    width: 1.5rem;
-                }
-                .username-row h3 {
-                    font-size: 0.85rem;
-                }
-            }
-            .header-actions {
-                gap: 2px;
-                button, .logout-btn {
-                    padding: 0.15rem 0.25rem !important;
-                    svg {
-                        width: 16px !important;
-                        height: 16px !important;
-                    }
-                }
-            }
+  .messages-area {
+    min-height: 0;
+    height: 100%;
+    overflow-y: auto;
+    /* Para que el área de mensajes ocupe el espacio restante y haga scroll */
+    display: flex;
+    flex-direction: column;
+  }
+
+  .chat-input-container {
+    position: sticky;
+    bottom: 0;
+    z-index: 2;
+    background: white;
+    /* Para evitar que el input se mueva al hacer scroll */
+  }
+
+  @media screen and (max-width: 768px) {
+    grid-template-rows: 56px 1fr 62px;
+    min-width: 0;
+    min-height: 0;
+    .chat-header {
+      padding: 0 0.7rem;
+      min-height: 56px;
+      max-height: 70px;
+      .user-details {
+        gap: 0.5rem;
+        .avatar img {
+          height: 2.1rem;
+          width: 2.1rem;
         }
-        /* Ajuste para el input y el footer del chat */
-        .chat-header, .header-actions, .user-details, .username-row {
-            min-width: 0;
-            max-width: 100vw;
-            overflow-x: auto;
+        .username-row h3 {
+          font-size: 0.97rem;
         }
+      }
+      .header-actions {
+        gap: 4px;
+        button, .logout-btn {
+          padding: 0.3rem 0.5rem !important;
+          svg {
+            width: 20px !important;
+            height: 20px !important;
+          }
+        }
+      }
     }
+    .chat-header, .header-actions, .user-details, .username-row {
+      min-width: 0;
+      max-width: 100vw;
+      overflow-x: auto;
+    }
+    .chat-input-container {
+      min-height: 62px;
+      max-height: 80px;
+    }
+  }
+
+  @media screen and (max-width: 480px) {
+    grid-template-rows: 48px 1fr 54px;
+    .chat-header {
+      padding: 0 0.1rem;
+      min-height: 48px;
+      max-height: 60px;
+      .user-details {
+        gap: 0.2rem;
+        .avatar img {
+          height: 1.5rem;
+          width: 1.5rem;
+        }
+        .username-row h3 {
+          font-size: 0.85rem;
+        }
+      }
+      .header-actions {
+        gap: 2px;
+        button, .logout-btn {
+          padding: 0.15rem 0.25rem !important;
+          svg {
+            width: 16px !important;
+            height: 16px !important;
+          }
+        }
+      }
+    }
+    .chat-header, .header-actions, .user-details, .username-row {
+      min-width: 0;
+      max-width: 100vw;
+      overflow-x: auto;
+    }
+    .chat-input-container {
+      min-height: 54px;
+      max-height: 70px;
+    }
+  }
 `
 
 const StatusWrapper = styled.span`
