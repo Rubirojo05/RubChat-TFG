@@ -25,3 +25,4 @@ coverage/
 
 # Otros
 .DS_Store
+Dockerfile
