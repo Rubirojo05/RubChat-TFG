@@ -5,6 +5,7 @@ import path from 'path'
 import fs from 'fs/promises'
 
 const User = new UserModel
+const BASE_URL = process.env.BASE_URL || "http://localhost:3000"
 
 export const login = async (req, res) => {
     const { email, password } = req.body
@@ -29,9 +30,9 @@ export const login = async (req, res) => {
             const filePath = path.join(process.cwd(), '/src/uploads/users', imageName)
             try {
                 await fs.access(filePath, fs.constants.F_OK)
-                imageUrl = `http://localhost:3000/uploads/users/${imageName}`
+                imageUrl = `${BASE_URL}/uploads/users/${imageName}`
             } catch (err) {
-                imageUrl = 'http://localhost:3000/uploads/users/DefaultImage.png'
+                imageUrl = `${BASE_URL}/uploads/users/DefaultImage.png`
             }
         }
 
@@ -79,7 +80,6 @@ export const refresh = async (req, res) => {
 
     try {
         result = await User.getByEmail({ email: token.email })
-        // --- Añade este control ---
         if (!result[0] || !result[0][0]) {
             return res.status(401).json({ message: 'Unauthorized' })
         }
@@ -97,9 +97,9 @@ export const refresh = async (req, res) => {
         const filePath = path.join(process.cwd(), '/src/uploads/users', imageName)
         try {
             await fs.access(filePath, fs.constants.F_OK)
-            imageUrl = `http://localhost:3000/uploads/users/${imageName}`
+            imageUrl = `${BASE_URL}/uploads/users/${imageName}`
         } catch (err) {
-            imageUrl = 'http://localhost:3000/uploads/users/DefaultImage.png'
+            imageUrl = `${BASE_URL}/uploads/users/DefaultImage.png`
         }
     }
 
@@ -112,7 +112,6 @@ export const refresh = async (req, res) => {
     }
 
     res.json({ accessToken: createAccessToken(userReturn), roleId: result[0][0].roleId, email: result[0][0].email })
-
 }
 
 export const logout = (req, res) => {

@@ -11,6 +11,7 @@ import fs from 'fs/promises'
 
 const User = new UserModel
 const Messages = new MessageModel
+const BASE_URL = process.env.BASE_URL || "http://localhost:3000"
 
 export const addUserController = async (req, res) => {
     const file = req.files && req.files.img && req.files.img.type ? req.files.img : false
@@ -161,7 +162,6 @@ export const getAllUsers = async (req, res) => {
     const { id } = req
     try {
         const result = await User.getAll()
-        //console.log("Resultado crudo de SQL:", result[0])
         const users = result[0].filter(item => item.id !== id)
 
         for (const user of users) {
@@ -175,13 +175,12 @@ export const getAllUsers = async (req, res) => {
                 const filePath = path.join(process.cwd(), '/src/uploads/users', imageName)
                 try {
                     await fs.access(filePath, fs.constants.F_OK)
-                    user.img = `http://localhost:3000/uploads/users/${imageName}`
+                    user.img = `${BASE_URL}/uploads/users/${imageName}`
                 } catch (err) {
-                    user.img = '../uploads/users/DefaultImage.png' // o una imagen por defecto si quieres
+                    user.img = `${BASE_URL}/uploads/users/DefaultImage.png`
                 }
             }
         }
-        //console.log("Usuarios enviados al frontend:", users)
         return res.status(200).json(users)
     } catch (error) {
         res.status(400).json({ message: 'server error' })
