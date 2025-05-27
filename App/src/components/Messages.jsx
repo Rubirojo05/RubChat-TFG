@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react"
 import styled from "styled-components"
 import { deleteMessage } from "../services/message"
 
-const BASE_URL = "http://localhost:3000"
+const BASE_URL = import.meta.env.VITE_API_URL
 
 const getFullUrl = (url) => {
   if (!url) return ""

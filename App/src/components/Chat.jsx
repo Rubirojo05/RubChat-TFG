@@ -54,7 +54,7 @@ const Chat = () => {
   // 2. SOCKET: solo conectar una vez
   useEffect(() => {
     if (!auth?.accessToken) return
-    socketRef.current = io("http://localhost:3000", {
+    socketRef.current = io(import.meta.env.VITE_API_URL, {
       query: { ...auth },
     })
 
@@ -96,7 +96,7 @@ const Chat = () => {
           idEmitor: chat.id,
           idReceptor: currentUser.id
         })
-      } catch (err) {}
+      } catch (err) { }
     }
     setUnread((prev) => ({ ...prev, [chat.id]: 0 }))
     if (isMobile) setShowMobileMenu(false)
