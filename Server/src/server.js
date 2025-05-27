@@ -89,6 +89,6 @@ app.use('/user', userRouter)
 
 app.use('*', errorHandler)
 
-const PORT = process.env.PORT || 3000
+const PORT = process.env.PORTAPI || 3000
 
 server.listen(PORT, () => { console.log(`server running on port: ${PORT}`) })
