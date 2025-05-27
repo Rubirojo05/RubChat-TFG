@@ -169,7 +169,7 @@ const ChatInput = ({ sendMessage, emitTyping }) => {
           <div className="icon more-menu" onClick={() => setShowMobileMenu(v => !v)}>
             <MoreVertical size={22} />
             {showMobileMenu && (
-              <MobileMenu>
+              <MobileMenu onClick={e => e.stopPropagation()}>
                 <input
                   type="file"
                   accept="image/*"
@@ -177,7 +177,13 @@ const ChatInput = ({ sendMessage, emitTyping }) => {
                   style={{ display: "none" }}
                   onChange={e => handleFileChange(e, "image")}
                 />
-                <label htmlFor="mobile-image-upload" className="icon">
+                <label
+                  htmlFor="mobile-image-upload"
+                  className="icon"
+                  tabIndex={0}
+                  onClick={e => e.stopPropagation()}
+                  onTouchStart={e => e.stopPropagation()}
+                >
                   <ImageIcon />
                 </label>
                 <input
@@ -187,10 +193,29 @@ const ChatInput = ({ sendMessage, emitTyping }) => {
                   style={{ display: "none" }}
                   onChange={e => handleFileChange(e, "audio")}
                 />
-                <label htmlFor="mobile-audio-upload" className="icon" title="Subir audio">
+                <label
+                  htmlFor="mobile-audio-upload"
+                  className="icon"
+                  title="Subir audio"
+                  tabIndex={0}
+                  onClick={e => e.stopPropagation()}
+                  onTouchStart={e => e.stopPropagation()}
+                >
                   <UploadAudioIcon />
                 </label>
-                <div className="icon" onClick={handleRecord} title={recording ? "Detener grabación" : "Grabar audio"}>
+                <div
+                  className="icon"
+                  onClick={e => {
+                    e.stopPropagation()
+                    handleRecord()
+                  }}
+                  onTouchStart={e => {
+                    e.stopPropagation()
+                    handleRecord()
+                  }}
+                  title={recording ? "Detener grabación" : "Grabar audio"}
+                  tabIndex={0}
+                >
                   <RecordIcon recording={recording} />
                 </div>
               </MobileMenu>
