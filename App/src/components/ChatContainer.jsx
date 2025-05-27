@@ -133,7 +133,7 @@ const ChatContainer = ({ currentChat, currentUser, socket, onlineUsers = [] }) =
             </StatusWrapper>
           </div>
         </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+        <div className="header-actions">
           {auth?.roleId === 1 && (
             <AdminButton
               title="Panel de administración"
@@ -181,6 +181,10 @@ const Container = styled.div`
     background-color: white;
     font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     height: 100%;
+    min-height: 0;
+    min-width: 0;
+    overflow: hidden;
+
     .chat-header {
         display: flex;
         justify-content: space-between;
@@ -188,10 +192,14 @@ const Container = styled.div`
         padding: 0 2rem;
         background-color: #f0f0f0;
         border-bottom: 1px solid #ddd;
+        min-height: 70px;
+        max-height: 90px;
+        box-sizing: border-box;
         .user-details{
             display: flex;
             align-items: center;
             gap: 1rem;
+            min-width: 0;
             .avatar {
                 img {
                     height: 3rem;
@@ -208,30 +216,97 @@ const Container = styled.div`
                 display: flex;
                 align-items: center;
                 gap: 0.7rem;
+                min-width: 0;
                 h3 {
                     color: #333;
                     margin: 0;
                     font-size: 1.15rem;
                     font-weight: 600;
+                    min-width: 0;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    white-space: nowrap;
                 }
             }
         }
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            min-width: 0;
+            flex-shrink: 0;
+        }
     }
-    
+
     @media screen and (max-width: 768px) {
+        grid-template-rows: 56px 1fr 62px;
+        min-width: 0;
+        min-height: 0;
         .chat-header {
-            padding: 0 1rem;
-            padding-left: 3.5rem;
+            padding: 0 0.7rem;
+            min-height: 56px;
+            max-height: 70px;
             .user-details {
                 gap: 0.5rem;
                 .avatar img {
-                    height: 2.5rem;
-                    width: 2.5rem;
+                    height: 2.1rem;
+                    width: 2.1rem;
                 }
                 .username-row h3 {
-                    font-size: 0.9rem;
+                    font-size: 0.97rem;
                 }
             }
+            .header-actions {
+                gap: 4px;
+                button, .logout-btn {
+                    padding: 0.3rem 0.5rem !important;
+                    svg {
+                        width: 20px !important;
+                        height: 20px !important;
+                    }
+                }
+            }
+        }
+        /* Ajuste para el input y el footer del chat */
+        .chat-header, .header-actions, .user-details, .username-row {
+            min-width: 0;
+            max-width: 100vw;
+            overflow-x: auto;
+        }
+    }
+
+    @media screen and (max-width: 480px) {
+        grid-template-rows: 48px 1fr 54px;
+        .chat-header {
+            padding: 0 0.1rem;
+            min-height: 48px;
+            max-height: 60px;
+            .user-details {
+                gap: 0.2rem;
+                .avatar img {
+                    height: 1.5rem;
+                    width: 1.5rem;
+                }
+                .username-row h3 {
+                    font-size: 0.85rem;
+                }
+            }
+            .header-actions {
+                gap: 2px;
+                button, .logout-btn {
+                    padding: 0.15rem 0.25rem !important;
+                    svg {
+                        width: 16px !important;
+                        height: 16px !important;
+                    }
+                }
+            }
+        }
+        /* Ajuste para el input y el footer del chat */
+        .chat-header, .header-actions, .user-details, .username-row {
+            min-width: 0;
+            max-width: 100vw;
+            overflow-x: auto;
         }
     }
 `

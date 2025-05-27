@@ -121,8 +121,8 @@ const ChatInput = ({ sendMessage, emitTyping }) => {
     }, 1500)
   }
 
-  // Detecta si es móvil (ancho <= 480px)
-  const isMobile = window.innerWidth <= 480
+  // Detecta si es móvil (ancho <= 600px)
+  const isMobile = window.innerWidth <= 600
 
   return (
     <Container>
@@ -167,7 +167,7 @@ const ChatInput = ({ sendMessage, emitTyping }) => {
         {/* Móvil: botón de menú de más opciones */}
         {isMobile && (
           <div className="icon more-menu" onClick={() => setShowMobileMenu(v => !v)}>
-            <MoreVertical size={24} />
+            <MoreVertical size={22} />
             {showMobileMenu && (
               <MobileMenu>
                 <input
@@ -230,6 +230,10 @@ const Container = styled.div`
             min-height: 36px;
             position: relative;
             z-index: 2;
+            svg {
+                width: 22px;
+                height: 22px;
+            }
         }
         .icon:hover {
             background-color: rgba(0, 0, 0, 0.07);
@@ -237,7 +241,7 @@ const Container = styled.div`
         input[type="text"] {
             flex: 1;
             border-radius: 2rem;
-            font-size: 1.2rem;
+            font-size: 1.15rem;
             padding-left: 1rem;
             padding-right: 1rem;
             background-color: #ffffff;
@@ -269,47 +273,51 @@ const Container = styled.div`
             justify-content: center;
             margin-left: 0.2rem;
             svg {
-                width: 24px;
-                height: 24px;
+                width: 22px;
+                height: 22px;
             }
         }
         .send-btn:hover {
             background-color: #555;
         }
         /* --- MOBILE --- */
-        @media screen and (max-width: 480px) {
-            padding: 0.2rem 0.1rem;
-            gap: 0.1rem;
+        @media screen and (max-width: 600px) {
+            padding: 0.1rem 0.05rem;
+            gap: 0.05rem;
             .icons-group {
                 display: none !important;
             }
             .icon {
-                min-width: 32px;
-                min-height: 32px;
-                padding: 0.1rem;
+                min-width: 28px;
+                min-height: 28px;
+                padding: 0.05rem;
+                svg {
+                    width: 18px;
+                    height: 18px;
+                }
             }
             input[type="text"] {
-                font-size: 1rem;
-                height: 36px;
-                padding-left: 0.7rem;
-                padding-right: 0.7rem;
+                font-size: 0.97rem;
+                height: 32px;
+                padding-left: 0.5rem;
+                padding-right: 0.5rem;
             }
             .send-btn {
-                width: 38px;
-                height: 38px;
+                width: 32px;
+                height: 32px;
                 svg {
-                    width: 20px;
-                    height: 20px;
+                    width: 16px;
+                    height: 16px;
                 }
             }
             .more-menu {
                 display: flex !important;
-                margin-left: 0.1rem;
-                margin-right: 0.1rem;
+                margin-left: 0.05rem;
+                margin-right: 0.05rem;
                 position: relative;
             }
         }
-        @media screen and (min-width: 481px) {
+        @media screen and (min-width: 601px) {
             .more-menu {
                 display: none !important;
             }
@@ -319,24 +327,28 @@ const Container = styled.div`
 
 const MobileMenu = styled.div`
   position: absolute;
-  bottom: 48px;
+  bottom: 38px;
   right: 0;
   background: #fff;
   border-radius: 12px;
   box-shadow: 0 4px 24px rgba(0,0,0,0.13);
-  padding: 0.5rem 0.7rem;
+  padding: 0.4rem 0.5rem;
   display: flex;
   flex-direction: column;
-  gap: 0.2rem;
+  gap: 0.15rem;
   z-index: 100;
   .icon {
-    min-width: 36px;
-    min-height: 36px;
-    padding: 0.2rem;
+    min-width: 28px;
+    min-height: 28px;
+    padding: 0.1rem;
     background: #f6f6f6;
     margin-bottom: 0.1rem;
     border-radius: 10px;
     justify-content: flex-start;
+    svg {
+      width: 18px;
+      height: 18px;
+    }
   }
   .icon:last-child {
     margin-bottom: 0;

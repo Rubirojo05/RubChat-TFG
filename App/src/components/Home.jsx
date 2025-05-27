@@ -173,7 +173,7 @@ const Home = () => {
                     }
                     .rubchat-container {
                         padding: 0 !important;
-                        margin-top: 130vh !important; /* Baja el contenido un poco más */
+                        margin-top: 3.5vh !important;
                         margin-bottom: 0 !important;
                         min-width: 100vw;
                         max-width: 100vw;
@@ -367,6 +367,42 @@ const Home = () => {
                         text-align: center !important;
                         width: 100vw !important;
                         box-sizing: border-box;
+                    }
+                }
+                /* Ajustes extra para móviles MUY pequeños */
+                @media (max-width: 400px) {
+                    .rubchat-container {
+                        margin-top: 160vh !important;
+                        padding: 0 !important;
+                    }
+                    .rubchat-title {
+                        font-size: 1.3rem !important;
+                    }
+                    .rubchat-typing-wrapper {
+                        font-size: 0.95rem !important;
+                    }
+                    .rubchat-description {
+                        font-size: 0.93rem !important;
+                    }
+                    .rubchat-btn {
+                        font-size: 0.97rem !important;
+                        padding: 0.7rem 0 !important;
+                    }
+                    .rubchat-section-title {
+                        font-size: 1.05rem !important;
+                    }
+                    .rubchat-feature-title,
+                    .rubchat-feature-description {
+                        font-size: 0.93rem !important;
+                    }
+                    .rubchat-cta-title {
+                        font-size: 1.05rem !important;
+                    }
+                    .rubchat-cta-description {
+                        font-size: 0.93rem !important;
+                    }
+                    .rubchat-footer {
+                        font-size: 0.93rem !important;
                     }
                 }
             `}</style>
