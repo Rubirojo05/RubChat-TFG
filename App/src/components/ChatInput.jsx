@@ -6,6 +6,7 @@ import EmojiPicker from "emoji-picker-react"
 import { useRef, useState } from "react"
 import { uploadImage, uploadAudio } from "../services/messageFiles"
 import { FaMicrophone, FaMusic } from "react-icons/fa"
+import { MoreVertical } from "lucide-react"
 
 const ImageIcon = () => (
   <svg width="24" height="24" fill="none" stroke="#555" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
@@ -30,6 +31,7 @@ const ChatInput = ({ sendMessage, emitTyping }) => {
   const [recording, setRecording] = useState(false)
   const [mediaRecorder, setMediaRecorder] = useState(null)
   const [audioChunks, setAudioChunks] = useState([])
+  const [showMobileMenu, setShowMobileMenu] = useState(false)
   const inputRef = useRef()
   const typingTimeout = useRef(null)
 
@@ -62,6 +64,7 @@ const ChatInput = ({ sendMessage, emitTyping }) => {
     }
     e.target.value = null // reset input
     if (emitTyping) emitTyping(false)
+    setShowMobileMenu(false)
   }
 
   // --- AUDIO POR MICRO ---
@@ -70,6 +73,7 @@ const ChatInput = ({ sendMessage, emitTyping }) => {
       if (mediaRecorder) mediaRecorder.stop()
       setRecording(false)
       if (emitTyping) emitTyping(false)
+      setShowMobileMenu(false)
       return
     }
     try {
@@ -99,6 +103,7 @@ const ChatInput = ({ sendMessage, emitTyping }) => {
     } catch (err) {
       alert("No se pudo acceder al micrófono")
     }
+    setShowMobileMenu(false)
   }
 
   // --- Emitir typing al escribir ---
@@ -116,6 +121,9 @@ const ChatInput = ({ sendMessage, emitTyping }) => {
     }, 1500)
   }
 
+  // Detecta si es móvil (ancho <= 480px)
+  const isMobile = window.innerWidth <= 480
+
   return (
     <Container>
       <form onSubmit={handleSubmit}>
@@ -130,7 +138,8 @@ const ChatInput = ({ sendMessage, emitTyping }) => {
           onChange={handleInputChange}
           value={msg}
         />
-        <div className="icons-group">
+        {/* PC/tablet: todos los iconos, móvil: solo botón enviar y menú */}
+        <div className={`icons-group${isMobile ? " mobile-hide" : ""}`}>
           <input
             type="file"
             accept="image/*"
@@ -155,6 +164,39 @@ const ChatInput = ({ sendMessage, emitTyping }) => {
             <RecordIcon recording={recording} />
           </div>
         </div>
+        {/* Móvil: botón de menú de más opciones */}
+        {isMobile && (
+          <div className="icon more-menu" onClick={() => setShowMobileMenu(v => !v)}>
+            <MoreVertical size={24} />
+            {showMobileMenu && (
+              <MobileMenu>
+                <input
+                  type="file"
+                  accept="image/*"
+                  id="mobile-image-upload"
+                  style={{ display: "none" }}
+                  onChange={e => handleFileChange(e, "image")}
+                />
+                <label htmlFor="mobile-image-upload" className="icon">
+                  <ImageIcon />
+                </label>
+                <input
+                  type="file"
+                  accept="audio/*"
+                  id="mobile-audio-upload"
+                  style={{ display: "none" }}
+                  onChange={e => handleFileChange(e, "audio")}
+                />
+                <label htmlFor="mobile-audio-upload" className="icon" title="Subir audio">
+                  <UploadAudioIcon />
+                </label>
+                <div className="icon" onClick={handleRecord} title={recording ? "Detener grabación" : "Grabar audio"}>
+                  <RecordIcon recording={recording} />
+                </div>
+              </MobileMenu>
+            )}
+          </div>
+        )}
         <button type="submit" className="send-btn">
           <SendIcons />
         </button>
@@ -186,6 +228,8 @@ const Container = styled.div`
             padding: 0.2rem;
             min-width: 36px;
             min-height: 36px;
+            position: relative;
+            z-index: 2;
         }
         .icon:hover {
             background-color: rgba(0, 0, 0, 0.07);
@@ -232,11 +276,12 @@ const Container = styled.div`
         .send-btn:hover {
             background-color: #555;
         }
-        @media screen and (max-width: 768px) {
-            padding: 0.3rem 0.2rem;
-            gap: 0.2rem;
+        /* --- MOBILE --- */
+        @media screen and (max-width: 480px) {
+            padding: 0.2rem 0.1rem;
+            gap: 0.1rem;
             .icons-group {
-                gap: 0.1rem;
+                display: none !important;
             }
             .icon {
                 min-width: 32px;
@@ -257,24 +302,45 @@ const Container = styled.div`
                     height: 20px;
                 }
             }
-        }
-        @media screen and (max-width: 480px) {
-            .icons-group {
-                .icon {
-                    display: none;
-                }
-                /* Mostramos solo el icono de imagen y el de grabar audio */
-                label[for="image-upload"].icon,
-                .icon:last-child {
-                    display: flex;
-                }
+            .more-menu {
+                display: flex !important;
+                margin-left: 0.1rem;
+                margin-right: 0.1rem;
+                position: relative;
             }
-            .icon, .send-btn {
-                min-width: 32px;
-                min-height: 32px;
+        }
+        @media screen and (min-width: 481px) {
+            .more-menu {
+                display: none !important;
             }
         }
     }
+`
+
+const MobileMenu = styled.div`
+  position: absolute;
+  bottom: 48px;
+  right: 0;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.13);
+  padding: 0.5rem 0.7rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  z-index: 100;
+  .icon {
+    min-width: 36px;
+    min-height: 36px;
+    padding: 0.2rem;
+    background: #f6f6f6;
+    margin-bottom: 0.1rem;
+    border-radius: 10px;
+    justify-content: flex-start;
+  }
+  .icon:last-child {
+    margin-bottom: 0;
+  }
 `
 
 export default ChatInput

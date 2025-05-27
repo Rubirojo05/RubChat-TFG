@@ -79,13 +79,19 @@ export const Register = () => {
                     </ImageSelector>
                 </ImageSection>
                 <FormSection>
+                    <MobileHeader>
+                        <BackHomeButton type="button" onClick={() => navigate("/")}>
+                            <ArrowLeft size={20} style={{marginRight: 8}} />
+                            Volver al inicio
+                        </BackHomeButton>
+                    </MobileHeader>
                     <Title>Crear cuenta en RubChat</Title>
                     <form onSubmit={handleForm} autoComplete="off">
                         <InputGroup>
                             <User size={20} />
                             <input
                                 type="text"
-                                placeholder="Nombre"
+                                placeholder="Nombre de usuario"
                                 autoComplete="off"
                                 onChange={(e) => setFirstname(e.target.value)}
                                 value={firstName}
@@ -138,11 +144,11 @@ export const Register = () => {
                         <RegisterLink>
                             ¿Ya tienes una cuenta? <Link to="/login">Inicia sesión</Link>
                         </RegisterLink>
+                        <PcBackHomeButton type="button" onClick={() => navigate("/")}>
+                            <ArrowLeft size={18} style={{marginRight: 6}} />
+                            Volver al inicio
+                        </PcBackHomeButton>
                     </form>
-                    <BackHomeButton type="button" onClick={() => navigate("/")}>
-                        <ArrowLeft size={18} style={{marginRight: 6}} />
-                        Volver al inicio
-                    </BackHomeButton>
                     {error && <ErrorMessage>{JSON.stringify(error)}</ErrorMessage>}
                     <ToastContainer />
                 </FormSection>
@@ -164,7 +170,9 @@ const Bg = styled.div`
     display: flex;
     justify-content: center;
     align-items: center;
+    padding: 0;
 `
+
 const Card = styled.div`
     display: flex;
     flex-direction: row;
@@ -177,7 +185,15 @@ const Card = styled.div`
     min-height: 480px;
     animation: ${fadeIn} 0.7s cubic-bezier(.39,.575,.56,1) both;
     overflow: hidden;
+    @media (max-width: 700px) {
+        flex-direction: column;
+        min-height: unset;
+        max-width: 99vw;
+        border-radius: 0;
+        box-shadow: none;
+    }
 `
+
 const ImageSection = styled.div`
     background: #f6f6f6;
     display: flex;
@@ -187,6 +203,13 @@ const ImageSection = styled.div`
     min-width: 320px;
     padding: 2.5rem 1.5rem;
     border-right: 1.5px solid #e3e6ee;
+    @media (max-width: 700px) {
+        min-width: unset;
+        width: 100%;
+        border-right: none;
+        border-bottom: 1.5px solid #e3e6ee;
+        padding: 1.2rem 0.5rem 1.5rem 0.5rem;
+    }
 `
 const FormSection = styled.div`
     flex: 1;
@@ -194,6 +217,18 @@ const FormSection = styled.div`
     flex-direction: column;
     justify-content: center;
     padding: 2.5rem 2.5rem;
+    @media (max-width: 700px) {
+        padding: 1.2rem 0.7rem;
+    }
+`
+const MobileHeader = styled.div`
+    display: none;
+    @media (max-width: 700px) {
+        display: flex;
+        width: 100%;
+        margin-bottom: 1.2rem;
+        justify-content: flex-start;
+    }
 `
 const ImageSelector = styled.div`
     display: flex;
@@ -226,6 +261,10 @@ const ImageCircle = styled.label`
         color: #888;
         transition: color 0.2s;
     }
+    @media (max-width: 700px) {
+        width: 90px;
+        height: 90px;
+    }
 `
 const PreviewImg = styled.img`
     width: 100%;
@@ -240,6 +279,9 @@ const ImageText = styled.span`
     margin-top: 0.1rem;
     margin-bottom: 0.2rem;
     font-weight: 500;
+    @media (max-width: 700px) {
+        font-size: 0.98rem;
+    }
 `
 const Title = styled.h1`
     font-size: 2.1rem;
@@ -249,6 +291,10 @@ const Title = styled.h1`
     text-align: center;
     letter-spacing: -1px;
     font-family: system-ui, sans-serif;
+    @media (max-width: 700px) {
+        font-size: 1.45rem;
+        margin-bottom: 1.1rem;
+    }
 `
 const InputGroup = styled.div`
     display: flex;
@@ -268,6 +314,7 @@ const InputGroup = styled.div`
         color: #888;
         margin-right: 0.7rem;
         transition: color 0.2s;
+        min-width: 20px;
     }
     input {
         border: none;
@@ -278,6 +325,14 @@ const InputGroup = styled.div`
         padding: 0.6rem 0;
         color: #222;
         transition: background 0.2s;
+        font-family: system-ui, sans-serif;
+    }
+    @media (max-width: 700px) {
+        padding: 0.4rem 0.7rem;
+        input {
+            font-size: 0.97rem;
+            padding: 0.5rem 0;
+        }
     }
 `
 const Button = styled.button`
@@ -298,12 +353,17 @@ const Button = styled.button`
         transform: translateY(-2px) scale(1.03);
         box-shadow: 0 6px 18px rgba(0,0,0,0.10);
     }
+    @media (max-width: 700px) {
+        font-size: 1rem;
+        padding: 0.7rem;
+    }
 `
 const RegisterLink = styled.div`
     margin-top: 1.2rem;
     font-size: 1rem;
     color: #444;
     font-family: system-ui, sans-serif;
+    text-align: center;
     a {
         color: #111;
         text-decoration: underline;
@@ -313,16 +373,19 @@ const RegisterLink = styled.div`
             color: #000;
         }
     }
+    @media (max-width: 700px) {
+        font-size: 0.97rem;
+    }
 `
-const BackHomeButton = styled.button`
-    margin: 1.5rem auto 0 auto;
-    display: flex;
+const PcBackHomeButton = styled.button`
+    display: none;
+    margin: 1.2rem auto 0 auto;
     align-items: center;
     background: transparent;
     color: #222;
     border: 1.5px solid #e3e6ee;
     border-radius: 7px;
-    padding: 0.5rem 1.1rem;
+    padding: 0.4rem 1rem;
     font-size: 1rem;
     font-weight: 500;
     cursor: pointer;
@@ -333,12 +396,43 @@ const BackHomeButton = styled.button`
         border: 1.5px solid #111;
         color: #111;
     }
+    @media (min-width: 701px) {
+        display: flex;
+        margin: 1.2rem auto 0 auto;
+    }
+`
+const BackHomeButton = styled.button`
+    display: flex;
+    align-items: center;
+    background: transparent;
+    color: #222;
+    border: 1.5px solid #e3e6ee;
+    border-radius: 7px;
+    padding: 0.4rem 1rem;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.18s, border 0.18s, color 0.18s;
+    font-family: system-ui, sans-serif;
+    margin-bottom: 0;
+    &:hover {
+        background: #f6f6f6;
+        border: 1.5px solid #111;
+        color: #111;
+    }
+    @media (min-width: 701px) {
+        display: none;
+    }
 `
 const ErrorMessage = styled.div`
     margin-top: 1rem;
     color: #c00;
     font-size: 0.95rem;
     text-align: center;
+    word-break: break-word;
+    @media (max-width: 700px) {
+        font-size: 0.92rem;
+    }
 `
 
 export default Register

@@ -10,6 +10,37 @@ import { Settings } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 import { useAuth } from "../hooks/useAuth"
 
+const ModalOverlay = styled.div`
+  position: fixed;
+  z-index: 9999;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 0.18s;
+  cursor: zoom-out;
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+`
+
+const ModalImg = styled.img`
+  max-width: 82vw;
+  max-height: 55vh;
+  border-radius: 18px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+  background: #fff;
+  cursor: pointer;
+  border: 3px solid #fff;
+  transition: box-shadow 0.18s, border 0.18s;
+  &:hover {
+    box-shadow: 0 12px 40px rgba(0,0,0,0.22);
+    border: 3px solid #bbb;
+  }
+`
+
 const ChatContainer = ({ currentChat, currentUser, socket, onlineUsers = [] }) => {
   const [messages, setMessages] = useState([])
   const [isTyping, setIsTyping] = useState(false)
@@ -17,6 +48,7 @@ const ChatContainer = ({ currentChat, currentUser, socket, onlineUsers = [] }) =
   const axios = useAxiosRefresh()
   const navigate = useNavigate()
   const { auth } = useAuth()
+  const [modalImg, setModalImg] = useState(null)
 
   useEffect(() => {
     ; (async () => {
@@ -69,15 +101,26 @@ const ChatContainer = ({ currentChat, currentUser, socket, onlineUsers = [] }) =
     }
   }
 
-  // CORRECCIÓN: compara siempre como string
   const isOnline = onlineUsers.includes(String(currentChat.id))
+
+  // Igual que en Contacts: cerrar modal al hacer click fuera de la imagen
+  const handleModalClose = (e) => {
+    if (e.target.classList.contains("modal-overlay")) {
+      setModalImg(null)
+    }
+  }
 
   return (
     <Container>
       <div className="chat-header">
         <div className="user-details">
           <div className="avatar">
-            <img src={currentChat.img || "/placeholder.svg"} alt="" />
+            <img
+              src={currentChat.img || "/placeholder.svg"}
+              alt=""
+              style={{ cursor: "pointer" }}
+              onClick={() => setModalImg(currentChat.img || "/placeholder.svg")}
+            />
           </div>
           <div className="username-row">
             <h3>{currentChat.firstName}</h3>
@@ -118,6 +161,16 @@ const ChatContainer = ({ currentChat, currentUser, socket, onlineUsers = [] }) =
         }}
         emitTyping={emitTyping}
       />
+      {modalImg && (
+        <ModalOverlay className="modal-overlay" onClick={handleModalClose}>
+          <ModalImg
+            src={modalImg}
+            alt="Foto de perfil"
+            onClick={() => setModalImg(null)}
+            title="Cerrar"
+          />
+        </ModalOverlay>
+      )}
     </Container>
   )
 }
@@ -145,6 +198,10 @@ const Container = styled.div`
                     width: 3rem;
                     border-radius: 50%;
                     object-fit: cover;
+                    transition: box-shadow 0.18s;
+                }
+                img:hover {
+                    box-shadow: 0 0 0 3px #bbb;
                 }
             }
             .username-row {
