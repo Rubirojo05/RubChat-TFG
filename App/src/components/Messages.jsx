@@ -134,6 +134,7 @@ const Container = styled.div`
   flex-direction: column;
   gap: 1.2rem;
   padding: 1rem 2rem;
+  height: 64vh;
   background-color: #f9f9f9;
 
   .message {
