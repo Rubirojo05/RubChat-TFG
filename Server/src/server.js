@@ -18,9 +18,6 @@ config()
 const app = express()
 app.use(cookieParser())
 app.use(express.json())
-/* app.use('/uploads/users', express.static(path.join(process.cwd(), 'src/uploads/users')))
-app.use('/uploads/images', express.static(path.join(process.cwd(), 'src/uploads/images')))
-app.use('/uploads/audio', express.static(path.join(process.cwd(), 'src/uploads/audio'))) */
 app.use(logger('dev'))
 app.use(cors(corsConfiguration()))
 
@@ -31,7 +28,6 @@ const io = new Server(server, {
 
 let onlineUsers = new Map()
 
-// Autenticación de middleware
 io.use((socket, next) => {
     if (socket.handshake.query && socket.handshake.query.accessToken) {
         const decode = decodeToken(socket.handshake.query.accessToken)
@@ -45,11 +41,10 @@ io.use((socket, next) => {
 })
     .on('connection', (socket) => {
         console.log('usuario conectado')
-        // Añadir usuario a la lista de usuarios en línea
         onlineUsers.set(socket.decoded.id, socket.id)
-        console.log(onlineUsers)
+        console.log('onlineUsers ahora:', Array.from(onlineUsers.keys()))
+        io.emit('online-users', Array.from(onlineUsers.keys()).map(String))
 
-        // --- Evento typing ---
         socket.on('typing', ({ to, from, isTyping }) => {
             const receptorSocketId = onlineUsers.get(to)
             if (receptorSocketId) {
@@ -59,24 +54,20 @@ io.use((socket, next) => {
 
         socket.on('disconnect', () => {
             console.log('usuario desconectado')
-            // Eliminar usuario de la lista de usuarios en línea
             onlineUsers.delete(socket.decoded.id)
-            console.log(onlineUsers)
+            io.emit('online-users', Array.from(onlineUsers.keys()).map(String))
         })
     })
 
 app.use('/message', (req, res, next) => {
     req.emitToSocket = (eventName, eventData, emisorId, receptorId) => {
-        // Si no se pasan, intenta obtenerlos del body (para compatibilidad)
         emisorId = emisorId || req.body.idEmitor || req.id
         receptorId = receptorId || req.body.idReceptor
         const receptorSocketId = onlineUsers.get(receptorId)
         const emisorSocketId = onlineUsers.get(emisorId)
-        // Emitir al receptor
         if (receptorSocketId) {
             io.to(receptorSocketId).emit(eventName, eventData)
         }
-        // Emitir también al emisor (si está conectado y es distinto)
         if (emisorSocketId && emisorSocketId !== receptorSocketId) {
             io.to(emisorSocketId).emit(eventName, eventData)
         }

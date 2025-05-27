@@ -16,13 +16,14 @@ const Chat = () => {
   const [showMobileMenu, setShowMobileMenu] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
   const [unread, setUnread] = useState({})
+  const [onlineUsers, setOnlineUsers] = useState([])
   const contactsRef = useRef(null)
   const socketRef = useRef(null)
   const axiosPrivate = useAxiosRefresh()
 
   const currentUser = auth?.accessToken ? jwtDecode(auth?.accessToken) : undefined
+  const contactsData = contacts?.data?.map(c => ({ ...c, id: String(c.id) })) || []
 
-  // 1. Solo pedir los no leídos UNA VEZ al iniciar sesión o cambiar de usuario
   useEffect(() => {
     if (!auth?.accessToken || !currentUser) return
     let cancel = false
@@ -51,28 +52,51 @@ const Chat = () => {
     return () => window.removeEventListener("resize", checkIfMobile)
   }, [])
 
-  // 2. SOCKET: solo conectar una vez
+  // --- CORRECCIÓN: Mantener onlineUsers actualizado siempre ---
   useEffect(() => {
     if (!auth?.accessToken) return
+    // Si ya hay una conexión previa, la cerramos antes de crear una nueva
+    if (socketRef.current) {
+      socketRef.current.disconnect()
+    }
     socketRef.current = io(import.meta.env.VITE_API_URL, {
-      query: { ...auth },
+      query: { accessToken: auth?.accessToken },
+      transports: ["websocket"], // Forzar websocket para evitar problemas de polling
     })
+
+    // Actualiza la lista de usuarios en línea cada vez que llega el evento
+    const handleOnlineUsers = (users) => {
+      setOnlineUsers(users)
+    }
 
     socketRef.current.on("connect", () => {
       console.log("Conectado al servidor")
     })
 
+    socketRef.current.on("online-users", handleOnlineUsers)
+
     return () => {
+      socketRef.current.off("online-users", handleOnlineUsers)
       socketRef.current.disconnect()
     }
-  }, [auth])
+  }, [auth?.accessToken])
 
-  // 3. Cuando recibes un mensaje, SOLO actualiza el contador en memoria
+  // --- Actualiza onlineUsers en tiempo real aunque cambie currentChat ---
+  useEffect(() => {
+    if (!socketRef.current) return
+    const handleOnlineUsers = (users) => {
+      setOnlineUsers(users)
+    }
+    socketRef.current.on("online-users", handleOnlineUsers)
+    return () => {
+      socketRef.current.off("online-users", handleOnlineUsers)
+    }
+  }, [currentChat])
+
   useEffect(() => {
     if (!socketRef.current) return
 
     const handleMsgReceive = (msg) => {
-      // Si el chat abierto NO es el del emisor, suma 1 a ese contacto en memoria
       if (!currentChat || msg.idEmitor !== currentChat.id) {
         setUnread(prev => ({
           ...prev,
@@ -87,7 +111,6 @@ const Chat = () => {
     }
   }, [currentChat])
 
-  // 4. Cuando abres un chat, marca como leídos en el backend y resetea el contador en memoria
   const handleChatChange = async (chat) => {
     setCurrentChat(chat)
     if (auth?.accessToken && currentUser) {
@@ -123,10 +146,11 @@ const Chat = () => {
         {currentUser && contacts && (
           <div className={`contacts-wrapper ${isMobile ? (showMobileMenu ? "show" : "") : ""}`} ref={contactsRef}>
             <Contacts
-              contacts={contacts.data}
+              contacts={contactsData}
               currentUser={currentUser}
               changeChat={handleChatChange}
               unread={unread}
+              onlineUsers={onlineUsers}
             />
           </div>
         )}
@@ -139,6 +163,7 @@ const Chat = () => {
               currentChat={currentChat}
               currentUser={currentUser}
               socket={socketRef.current}
+              onlineUsers={onlineUsers}
             />
           ) : (
             <Welcome userName={currentUser?.firstName} />
@@ -175,7 +200,7 @@ const Container = styled.div`
         .contacts-wrapper {
             grid-column: 1;
             height: 100%;
-            overflow: hidden; /* Evitar desbordamiento */
+            overflow: hidden;
         }
         
         .chat-wrapper {

@@ -10,7 +10,7 @@ import { Settings } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 import { useAuth } from "../hooks/useAuth"
 
-const ChatContainer = ({ currentChat, currentUser, socket }) => {
+const ChatContainer = ({ currentChat, currentUser, socket, onlineUsers = [] }) => {
   const [messages, setMessages] = useState([])
   const [isTyping, setIsTyping] = useState(false)
   const typingTimeout = useRef(null)
@@ -18,7 +18,6 @@ const ChatContainer = ({ currentChat, currentUser, socket }) => {
   const navigate = useNavigate()
   const { auth } = useAuth()
 
-  // Escuchar mensajes
   useEffect(() => {
     ; (async () => {
       const response = await axios.post("/message/user", { idReceptor: currentChat.id })
@@ -26,7 +25,6 @@ const ChatContainer = ({ currentChat, currentUser, socket }) => {
     })()
   }, [currentChat])
 
-  // Escuchar mensajes recibidos
   useEffect(() => {
     if (!socket) return
     const listener = (msg) => {
@@ -43,7 +41,6 @@ const ChatContainer = ({ currentChat, currentUser, socket }) => {
     }
   }, [socket, currentChat, currentUser])
 
-  // --- Escuchar typing del otro usuario ---
   useEffect(() => {
     if (!socket) return
     const handleTyping = ({ from, isTyping }) => {
@@ -62,7 +59,6 @@ const ChatContainer = ({ currentChat, currentUser, socket }) => {
     }
   }, [socket, currentChat])
 
-  // --- Función para emitir typing ---
   const emitTyping = (typing) => {
     if (socket && currentChat && currentUser) {
       socket.emit("typing", {
@@ -73,6 +69,9 @@ const ChatContainer = ({ currentChat, currentUser, socket }) => {
     }
   }
 
+  // CORRECCIÓN: compara siempre como string
+  const isOnline = onlineUsers.includes(String(currentChat.id))
+
   return (
     <Container>
       <div className="chat-header">
@@ -82,9 +81,13 @@ const ChatContainer = ({ currentChat, currentUser, socket }) => {
           </div>
           <div className="username-row">
             <h3>{currentChat.firstName}</h3>
-            {isTyping && (
-              <TypingIndicator>Escribiendo...</TypingIndicator>
-            )}
+            <StatusWrapper>
+              <StatusDot $online={isOnline} />
+              <StatusText $online={isOnline}>{isOnline ? "En línea" : "Desconectado"}</StatusText>
+              {isTyping && (
+                <TypingIndicator>Escribiendo...</TypingIndicator>
+              )}
+            </StatusWrapper>
           </div>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
@@ -176,6 +179,26 @@ const Container = styled.div`
     }
 `
 
+const StatusWrapper = styled.span`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-left: 0.7rem;
+`
+const StatusDot = styled.span`
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: ${({ $online }) => ($online ? "#27ae60" : "#bbb")};
+  border: 1.5px solid #fff;
+  box-shadow: 0 0 2px #aaa;
+  display: inline-block;
+`
+const StatusText = styled.span`
+  font-size: 0.97rem;
+  color: ${({ $online }) => ($online ? "#27ae60" : "#888")};
+  font-weight: 500;
+`
 const TypingIndicator = styled.div`
   font-size: 0.97rem;
   color: #1abc9c;

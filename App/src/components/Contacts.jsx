@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import styled from "styled-components"
 
-export default function Contacts({ contacts, currentUser, changeChat, unread = {} }) {
+export default function Contacts({ contacts, currentUser, changeChat, unread = {}, onlineUsers = [] }) {
   const [currentUserName, setCurrentUserName] = useState(undefined)
   const [currentUserImage, setCurrentUserImage] = useState(undefined)
   const [currentSelected, setCurrentSelected] = useState(undefined)
@@ -20,9 +20,10 @@ export default function Contacts({ contacts, currentUser, changeChat, unread = {
     changeChat(contact)
   }
 
-  // Refresca la página o recarga datos tras editar/eliminar usuario
-  const handleUserUpdated = () => window.location.reload()
-  const handleUserDeleted = () => window.location.href = "/login"
+  // Compara como string para evitar problemas de tipo
+  const isUserOnline = (userId) => {
+    return onlineUsers.includes(String(userId))
+  }
 
   return (
     <>
@@ -30,6 +31,7 @@ export default function Contacts({ contacts, currentUser, changeChat, unread = {
         <Container>
           <div className="contacts">
             {contacts.map((contact, index) => {
+              const online = isUserOnline(contact.id)
               return (
                 <div
                   key={contact.id}
@@ -41,15 +43,24 @@ export default function Contacts({ contacts, currentUser, changeChat, unread = {
                     {unread[contact.id] > 0 && (
                       <span className="unread-badge">{unread[contact.id]}</span>
                     )}
+                    <span
+                      className={`status-dot ${online ? "online" : "offline"}`}
+                      title={online ? "En línea" : "Desconectado"}
+                    />
                   </div>
                   <div className="username">
-                    <h3>{contact.firstName}</h3>
+                    <h3>
+                      {contact.firstName}
+                      <span className="status-text">
+                        {online ? " (En línea)" : " (Desconectado)"}
+                      </span>
+                    </h3>
                   </div>
                 </div>
               )
             })}
           </div>
-          <div className="current-user" style={{cursor: "pointer"}}>
+          <div className="current-user" style={{ cursor: "pointer" }}>
             <div className="avatar">
               <img src={`${currentUserImage}`} alt="" />
             </div>
@@ -124,10 +135,34 @@ const Container = styled.div`
                   box-shadow: 0 2px 6px rgba(0,0,0,0.07);
                   z-index: 2;
                 }
+                .status-dot {
+                  position: absolute;
+                  bottom: 3px;  
+                  right: 1px;    
+                  width: 13px;
+                  height: 13px;
+                  border-radius: 50%;
+                  border: 2px solid #fff;
+                  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+                  background: #bbb;
+                  z-index: 3;
+                }
+                .status-dot.online {
+                  background: #27ae60;
+                }
+                .status-dot.offline {
+                  background: #bbb;
+                }
             }
             .username {
                 h3 {
                     color: #333;
+                }
+                .status-text {
+                  font-size: 0.85rem;
+                  color: #888;
+                  font-weight: 400;
+                  margin-left: 0.3rem;
                 }
             }
         }

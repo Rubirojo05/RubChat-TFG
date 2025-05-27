@@ -11,7 +11,8 @@ import fs from 'fs/promises'
 
 const User = new UserModel
 const Messages = new MessageModel
-const BASE_URL = process.env.BASE_URL || "http://localhost:3000"
+
+const DEFAULT_AVATAR_URL = "https://res.cloudinary.com/dc4m6ur4f/image/upload/v1748351647/DefaultImage_mf97vm.png"
 
 export const addUserController = async (req, res) => {
     const file = req.files && req.files.img && req.files.img.type ? req.files.img : false
@@ -26,9 +27,8 @@ export const addUserController = async (req, res) => {
     const duplicate = await User.getByEmail({ email })
     if (duplicate[0].length) return res.status(409).json({ message: 'Duplicate username' })
 
-    let imgUrl = 'DefaultImage.png'
+    let imgUrl = DEFAULT_AVATAR_URL
     if (file) {
-        // SUBIR A CLOUDINARY
         try {
             const result = await cloudinary.uploader.upload(file.path, {
                 folder: "user-profile",
@@ -46,8 +46,7 @@ export const addUserController = async (req, res) => {
         await User.add({ ...validate.data, password: hashed_password, id, img: imgUrl })
         res.status(200).json({ message: 'user add' })
     } catch (error) {
-        // Solo borrar si subiste imagen local y no es la imagen por defecto ni una URL de Cloudinary
-        if (file && file.path && imgUrl !== 'DefaultImage.png' && !imgUrl.startsWith('http')) {
+        if (file && file.path && imgUrl !== DEFAULT_AVATAR_URL && !imgUrl.startsWith('http')) {
             deletelinkFile({ path: file.path.split('\\').pop() })
         }
         return res.status(400).json({ message: 'error at insert user' })
@@ -59,17 +58,14 @@ export const updateUserController = async (req, res) => {
     if (!id) return res.status(400).json({ message: 'id required' })
     delete req.body.id
 
-    // Permite actualizar solo el rol y/o email si es lo único que llega
     const newvalidate = { ...rest }
     if (roleId !== undefined) newvalidate.roleId = Number(roleId)
     if (email) newvalidate.email = email
 
-    // Si solo se actualiza el rol o email, no hace falta validar imagen o password
     if (Object.keys(newvalidate).length === 0) {
         return res.status(400).json({ message: 'No data to update' })
     }
 
-    // Validación parcial solo si hay más campos
     let validate = { data: newvalidate }
     if (newvalidate.password || newvalidate.img || newvalidate.firstName || newvalidate.lastName) {
         validate = validateUpdateUserPartial(newvalidate)
@@ -81,7 +77,6 @@ export const updateUserController = async (req, res) => {
     const user = await User.getById({ id })
     if (!user || !user[0].length) return res.status(400).json({ message: 'User not found' })
 
-    // Si se actualiza el email, comprueba duplicados
     if (email) {
         const duplicate = await User.getByEmail({ email })
         if (duplicate[0].length && duplicate[0][0].id !== id) {
@@ -89,7 +84,6 @@ export const updateUserController = async (req, res) => {
         }
     }
 
-    // Si hay imagen, súbela a Cloudinary
     const file = req.files?.img ? req.files.img : undefined
     if (file) {
         try {
@@ -103,7 +97,6 @@ export const updateUserController = async (req, res) => {
         }
     }
 
-    // Si hay password, hasheala
     if (newvalidate.password) {
         newvalidate.password = await hashPassword({ password: newvalidate.password })
     }
@@ -128,16 +121,11 @@ export const deleteUser = async (req, res) => {
     const img = user[0][0].img
 
     try {
-        // 1. Elimina todos los mensajes donde el usuario sea emisor o receptor
         await Messages.deleteAllByUser({ id })
-
-        // 2. Elimina el usuario
         await User.deletebyId({ id })
 
-        // 3. Borra la imagen si corresponde
-        if (img && img !== 'DefaultImage.png') {
+        if (img && img !== DEFAULT_AVATAR_URL) {
             if (img.startsWith('http')) {
-                // Es Cloudinary: extrae el public_id y borra
                 const matches = img.match(/\/user-profile\/([^\.\/]+)\.(jpg|jpeg|png|webp|gif)$/i)
                 if (matches) {
                     const publicId = `user-profile/${matches[1]}`
@@ -148,7 +136,6 @@ export const deleteUser = async (req, res) => {
                     }
                 }
             } else {
-                // Es local
                 deletelinkFile({ path: img })
             }
         }
@@ -168,17 +155,9 @@ export const getAllUsers = async (req, res) => {
             const imageName = user.img
             user.roleId = Number(user.roleId)
             if (imageName && imageName.startsWith('http')) {
-                // Ya es una URL de Cloudinary, no tocar
                 user.img = imageName
             } else {
-                // Es una imagen local, construir la URL local
-                const filePath = path.join(process.cwd(), '/src/uploads/users', imageName)
-                try {
-                    await fs.access(filePath, fs.constants.F_OK)
-                    user.img = `${BASE_URL}/uploads/users/${imageName}`
-                } catch (err) {
-                    user.img = `${BASE_URL}/uploads/users/DefaultImage.png`
-                }
+                user.img = DEFAULT_AVATAR_URL
             }
         }
         return res.status(200).json(users)
@@ -191,7 +170,6 @@ export const getUserbyId = async (req, res) => {
     const { id } = req
     try {
         const result = await User.getById({ id })
-        // Si quieres, puedes aplicar la misma lógica de imagen aquí
         return res.status(200).json(result[0][0])
     } catch (error) {
         res.status(400).json({ message: 'User not found' })

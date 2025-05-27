@@ -1,11 +1,10 @@
 import { createAccessToken, createRefreshToken, decodeTokenRefresh } from '../utils/jwt.js';
 import { compareHashPassword } from '../utils/auth.js';
 import { UserModel } from "../models/user.model.js";
-import path from 'path'
-import fs from 'fs/promises'
 
 const User = new UserModel
-const BASE_URL = process.env.BASE_URL || "http://localhost:3000"
+
+const DEFAULT_AVATAR_URL = "https://res.cloudinary.com/dc4m6ur4f/image/upload/v1748351647/DefaultImage_mf97vm.png"
 
 export const login = async (req, res) => {
     const { email, password } = req.body
@@ -20,20 +19,13 @@ export const login = async (req, res) => {
         const bool = await compareHashPassword({ password, hashed_password: result[0][0].password })
         if (!bool) return res.status(401).json({ message: 'Unauthorized' })
 
-        //obtener url de la imagen
         const imageName = result[0][0].img
         let imageUrl
 
         if (imageName && imageName.startsWith('http')) {
             imageUrl = imageName
         } else {
-            const filePath = path.join(process.cwd(), '/src/uploads/users', imageName)
-            try {
-                await fs.access(filePath, fs.constants.F_OK)
-                imageUrl = `${BASE_URL}/uploads/users/${imageName}`
-            } catch (err) {
-                imageUrl = `${BASE_URL}/uploads/users/DefaultImage.png`
-            }
+            imageUrl = DEFAULT_AVATAR_URL
         }
 
         const userReturn = {
@@ -87,20 +79,13 @@ export const refresh = async (req, res) => {
         return res.status(401).json({ message: 'Unauthorized' })
     }
 
-    //obtener url de la imagen
     const imageName = result[0][0].img
     let imageUrl
 
     if (imageName && imageName.startsWith('http')) {
         imageUrl = imageName
     } else {
-        const filePath = path.join(process.cwd(), '/src/uploads/users', imageName)
-        try {
-            await fs.access(filePath, fs.constants.F_OK)
-            imageUrl = `${BASE_URL}/uploads/users/${imageName}`
-        } catch (err) {
-            imageUrl = `${BASE_URL}/uploads/users/DefaultImage.png`
-        }
+        imageUrl = DEFAULT_AVATAR_URL
     }
 
     const userReturn = {
