@@ -250,6 +250,7 @@ const Container = styled.div`
     min-height: 0;
     height: 100%;
     overflow-y: auto;
+    flex: 1 1 auto;
     /* Para que el área de mensajes ocupe el espacio restante y haga scroll */
     display: flex;
     flex-direction: column;
