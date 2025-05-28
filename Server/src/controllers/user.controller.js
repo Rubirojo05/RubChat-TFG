@@ -8,8 +8,8 @@ import { validateUpdateUserPartial } from '../validator/userUpdate.validator.js'
 import cloudinary from '../utils/cloudinary.js'
 import { createAccessToken } from '../utils/jwt.js'
 
-const User = new UserModel
-const Messages = new MessageModel
+export const User = new UserModel()
+export const Messages = new MessageModel()
 
 const DEFAULT_AVATAR_URL = "https://res.cloudinary.com/dc4m6ur4f/image/upload/v1748351647/DefaultImage_mf97vm.png"
 
@@ -198,3 +198,5 @@ export const getUserbyId = async (req, res) => {
         res.status(400).json({ message: 'User not found' })
     }
 }
+
+export { validateUser }

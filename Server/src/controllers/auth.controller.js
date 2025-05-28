@@ -2,7 +2,7 @@ import { createAccessToken, createRefreshToken, decodeTokenRefresh } from '../ut
 import { compareHashPassword } from '../utils/auth.js';
 import { UserModel } from "../models/user.model.js";
 
-const User = new UserModel
+export const User = new UserModel()
 
 const DEFAULT_AVATAR_URL = "https://res.cloudinary.com/dc4m6ur4f/image/upload/v1748351647/DefaultImage_mf97vm.png"
 
@@ -105,3 +105,5 @@ export const logout = (req, res) => {
     res.clearCookie('refreshToken', { httpOnly: true, sameSite: 'None', secure: true })
     res.json({ message: 'cookie cleared' })
 }
+
+export { compareHashPassword }

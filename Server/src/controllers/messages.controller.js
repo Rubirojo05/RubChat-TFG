@@ -4,7 +4,7 @@ import { MessageModel } from "../models/message.model.js";
 import { pool } from '../models/DBConnection.js'
 import cloudinary from '../utils/cloudinary.js'
 
-const Message = new MessageModel
+export const Message = new MessageModel()
 
 export const addUserMessage = async (req, res) => {
     const { id } = req
@@ -31,7 +31,7 @@ export const addUserMessage = async (req, res) => {
         await Message.add({ ...messageToAdd })
         const { emitToSocket } = req
 
-        emitToSocket('msg-receive', messageToAdd)
+        emitToSocket && emitToSocket('msg-receive', messageToAdd)
         res.status(200).json({ ...messageToAdd })
 
     } catch (error) {
@@ -65,7 +65,7 @@ export const getMessages = async (req, res) => {
         const result = await Message.getAll()
         if (!(result.length)) return res.status(400).json({ message: 'No notes found' })
         const { io } = req
-        io.emit('messages', result[0])
+        io && io.emit('messages', result[0])
         res.status(200).json(result[0])
 
     } catch (error) {
@@ -108,7 +108,6 @@ export const deleteMessage = async (req, res) => {
         const [updated] = await Message.getById({ id })
         // Obtener emisor y receptor del mensaje
         const { idEmitor, idReceptor } = updated[0]
-        // Emitir a ambos usuarios
         req.emitToSocket && req.emitToSocket('msg-delete', updated[0], idEmitor, idReceptor)
         return res.status(200).json({ message: 'message deleted', messageUpdated: updated[0] })
     } catch (error) {
@@ -135,3 +134,5 @@ export const markAsRead = async (req, res) => {
     )
     res.json({ ok: true })
 }
+
+export { validateMessage, validateMessageUpdate }
