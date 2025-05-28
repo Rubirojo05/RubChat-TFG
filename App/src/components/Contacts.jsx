@@ -1,8 +1,10 @@
 "use client"
 
-import { useEffect, useState } from "react"
-import styled from "styled-components"
-import { Search } from "lucide-react"
+import { useEffect, useState, useRef } from "react"
+import styled, { keyframes } from "styled-components"
+import { Search, Camera } from "lucide-react"
+import { instancePrivate } from "../services/axios"
+import { useAuth } from "../hooks/useAuth"
 
 export default function Contacts({ contacts, currentUser, changeChat, unread = {}, onlineUsers = [] }) {
   const [currentUserName, setCurrentUserName] = useState(undefined)
@@ -10,6 +12,12 @@ export default function Contacts({ contacts, currentUser, changeChat, unread = {
   const [currentSelected, setCurrentSelected] = useState(undefined)
   const [search, setSearch] = useState("")
   const [modalImg, setModalImg] = useState(null)
+  const [showChangeBtn, setShowChangeBtn] = useState(false)
+  const [uploading, setUploading] = useState(false)
+  const [errorMsg, setErrorMsg] = useState("")
+  const [successMsg, setSuccessMsg] = useState("")
+  const fileInputRef = useRef()
+  const { updateAuthLogin, auth } = useAuth()
 
   useEffect(() => {
     if (currentUser) {
@@ -43,7 +51,66 @@ export default function Contacts({ contacts, currentUser, changeChat, unread = {
   const handleModalClose = (e) => {
     if (e.target.classList.contains("modal-overlay")) {
       setModalImg(null)
+      setShowChangeBtn(false)
+      setErrorMsg("")
+      setSuccessMsg("")
     }
+  }
+
+  // Cuando se abre el modal, muestra el botón solo si es la imagen del usuario actual
+  useEffect(() => {
+    if (!modalImg || !currentUserImage) {
+      setShowChangeBtn(false)
+      return
+    }
+    setShowChangeBtn(modalImg === currentUserImage)
+  }, [modalImg, currentUserImage])
+
+  // Maneja el click en "Cambiar imagen"
+  const handleChangeImageClick = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.value = null
+      fileInputRef.current.click()
+    }
+  }
+
+  // Sube la nueva imagen y actualiza el perfil
+  const handleFileChange = async (e) => {
+    setErrorMsg("")
+    setSuccessMsg("")
+    const file = e.target.files[0]
+    if (!file) return
+    if (!file.type.startsWith("image/")) {
+      setErrorMsg("El archivo seleccionado no es una imagen válida.")
+      return
+    }
+    setUploading(true)
+    try {
+      const formData = new FormData()
+      formData.append("id", currentUser.id)
+      formData.append("img", file)
+      // No pongas Content-Type, axios lo gestiona
+      const res = await instancePrivate.patch("/user/", formData)
+      if (res.data?.user) {
+        // Mapea correctamente el campo de la imagen
+        updateAuthLogin({
+          ...auth,
+          url: res.data.user.img
+        })
+        setCurrentUserImage(res.data.user.img)
+        setModalImg(res.data.user.img)
+        setSuccessMsg("Imagen cambiada correctamente")
+        setTimeout(() => {
+          setModalImg(null)
+          setSuccessMsg("")
+        }, 1500)
+      } else {
+        setErrorMsg("No se pudo actualizar la imagen. Intenta de nuevo.")
+      }
+    } catch (err) {
+      setErrorMsg("Error al actualizar la imagen de perfil")
+    }
+    setUploading(false)
   }
 
   return (
@@ -121,12 +188,50 @@ export default function Contacts({ contacts, currentUser, changeChat, unread = {
           </div>
           {modalImg && (
             <ModalOverlay className="modal-overlay" onClick={handleModalClose}>
-              <ModalImg
-                src={modalImg}
-                alt="Foto de perfil"
-                onClick={() => setModalImg(null)}
-                title="Cerrar"
-              />
+              <ModalImgWrapper>
+                <div style={{ position: "relative", display: "flex", flexDirection: "column", alignItems: "center" }}>
+                  <ModalImg
+                    src={modalImg}
+                    alt="Foto de perfil"
+                    onClick={() => setModalImg(null)}
+                    title="Cerrar"
+                  />
+                  {showChangeBtn && (
+                    <ChangeBtn
+                      type="button"
+                      onClick={handleChangeImageClick}
+                      disabled={uploading}
+                      style={{
+                        position: "absolute",
+                        left: "50%",
+                        bottom: "35px",
+                        border: "white 1px solid",
+                        transform: "translateX(-50%)",
+                        zIndex: 2,
+                        minWidth: "170px"
+                      }}
+                    >
+                      <Camera size={18} style={{ marginRight: 7 }} />
+                      {uploading ? "Actualizando..." : "Cambiar imagen"}
+                    </ChangeBtn>
+                  )}
+                </div>
+                {showChangeBtn && (
+                  <WarningMsg>
+                    Al cambiar la imagen tendrás que iniciar sesión de nuevo.
+                  </WarningMsg>
+                )}
+                <input
+                  type="file"
+                  accept="image/*"
+                  style={{ display: "none" }}
+                  ref={fileInputRef}
+                  onChange={handleFileChange}
+                  disabled={uploading}
+                />
+                {errorMsg && <ErrorMsg>{errorMsg}</ErrorMsg>}
+                {successMsg && <SuccessMsg>{successMsg}</SuccessMsg>}
+              </ModalImgWrapper>
             </ModalOverlay>
           )}
         </Container>
@@ -135,6 +240,11 @@ export default function Contacts({ contacts, currentUser, changeChat, unread = {
   )
 }
 
+const fadeIn = keyframes`
+  from { opacity: 0; transform: translateY(20px);}
+  to { opacity: 1; transform: translateY(0);}
+`
+
 const Container = styled.div`
     display: grid;
     grid-template-rows: auto 1fr auto;
@@ -142,7 +252,6 @@ const Container = styled.div`
     background-color: #f8f8f8;
     height: 100%;
     font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-
     .not-found {
       text-align: center;
       color: #c0392b;
@@ -150,7 +259,6 @@ const Container = styled.div`
       margin: 1.2rem 0 0.5rem 0;
       font-family: inherit;
     }
-
     .contacts {
         display: flex;
         flex-direction: column;
@@ -252,7 +360,6 @@ const Container = styled.div`
     .contact:hover{
         background-color: #d8d8d8;
     }
-
     .current-user {
         background-color: #e8e8e8;
         display: flex;
@@ -297,9 +404,7 @@ const Container = styled.div`
             }
         }
     }
-
     @media screen and (max-width: 900px) and (min-width: 481px) {
-      /* Baja la barra de búsqueda y la lista de contactos un poco */
       padding-top: 32px;
       .contacts {
         padding-top: 1.5rem;
@@ -308,7 +413,6 @@ const Container = styled.div`
         margin-top: 2rem;
       }
     }
-    
     @media screen and (min-width: 769px) and (max-width: 1080px) {
         .current-user {
             gap: 1.5rem;
@@ -335,7 +439,6 @@ const Container = styled.div`
             }
         }
     }
-    
     @media screen and (max-width: 768px) {
         .current-user {
             gap: 1.1rem;
@@ -374,6 +477,16 @@ const ModalOverlay = styled.div`
   }
 `
 
+const ModalImgWrapper = styled.div`
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 260px;
+  min-height: 220px;
+  animation: ${fadeIn} 0.3s;
+`
+
 const ModalImg = styled.img`
   max-width: 82vw;
   max-height: 55vh;
@@ -383,10 +496,74 @@ const ModalImg = styled.img`
   cursor: pointer;
   border: 3px solid #fff;
   transition: box-shadow 0.18s, border 0.18s;
+  margin-bottom: 1.2rem;
   &:hover {
     box-shadow: 0 12px 40px rgba(0,0,0,0.22);
     border: 3px solid #bbb;
   }
+`
+
+const ChangeBtn = styled.button`
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: #111;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 0.85rem 1.7rem;
+  font-size: 1.09rem;
+  font-weight: 700;
+  cursor: pointer;
+  margin-top: 0.2rem;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.10);
+  letter-spacing: 0.01em;
+  /* Sin animación de color ni gradiente */
+  &:hover {
+    background: #222;
+    transform: none;
+  }
+  &:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    background: #444;
+  }
+`
+
+const WarningMsg = styled.div`
+  color: #c0392b;
+  background: #fff6f0;
+  border-radius: 7px;
+  padding: 0.6rem 1.2rem;
+  margin-top: 0.8rem;
+  font-size: 1rem;
+  font-weight: 500;
+  animation: ${fadeIn} 0.3s;
+  text-align: center;
+`
+
+const ErrorMsg = styled.div`
+  color: #e74c3c;
+  background: #fff3f3;
+  border-radius: 7px;
+  padding: 0.6rem 1.2rem;
+  margin-top: 1.1rem;
+  font-size: 1rem;
+  font-weight: 500;
+  animation: ${fadeIn} 0.3s;
+  text-align: center;
+`
+
+const SuccessMsg = styled.div`
+  color: #27ae60;
+  background: #eafaf1;
+  border-radius: 7px;
+  padding: 0.6rem 1.2rem;
+  margin-top: 1.1rem;
+  font-size: 1rem;
+  font-weight: 500;
+  animation: ${fadeIn} 0.3s;
+  text-align: center;
 `
 
 const SearchBar = styled.div`

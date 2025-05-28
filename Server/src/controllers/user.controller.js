@@ -6,8 +6,7 @@ import { hashPassword } from '../utils/auth.js';
 import { deletelinkFile, ulrImage } from '../utils/pathOfImg.js';
 import { validateUpdateUserPartial } from '../validator/userUpdate.validator.js';
 import cloudinary from '../utils/cloudinary.js'
-import path from 'path'
-import fs from 'fs/promises'
+import { createAccessToken } from '../utils/jwt.js'
 
 const User = new UserModel
 const Messages = new MessageModel
@@ -62,6 +61,15 @@ export const updateUserController = async (req, res) => {
     if (roleId !== undefined) newvalidate.roleId = Number(roleId)
     if (email) newvalidate.email = email
 
+    // --- AÑADIDO: Si hay archivo, añade el objeto img para la validación ---
+    const file = req.files?.img ? req.files.img : undefined
+    if (file) {
+        newvalidate.img = {
+            size: file.size,
+            type: file.type
+        }
+    }
+
     if (Object.keys(newvalidate).length === 0) {
         return res.status(400).json({ message: 'No data to update' })
     }
@@ -70,8 +78,9 @@ export const updateUserController = async (req, res) => {
     if (newvalidate.password || newvalidate.img || newvalidate.firstName || newvalidate.lastName) {
         validate = validateUpdateUserPartial(newvalidate)
         if (validate.error) return res.status(400).json({ error: JSON.parse(validate.error.message) })
-        newvalidate.active = validate.data.active
-        newvalidate.roleId = validate.data.roleId
+        // Asegúrate de que estos campos existen tras la validación
+        newvalidate.active = validate.data.active ?? 1
+        newvalidate.roleId = validate.data.roleId ?? 2
     }
 
     const user = await User.getById({ id })
@@ -84,7 +93,7 @@ export const updateUserController = async (req, res) => {
         }
     }
 
-    const file = req.files?.img ? req.files.img : undefined
+    // --- SUBIDA A CLOUDINARY ---
     if (file) {
         try {
             const result = await cloudinary.uploader.upload(file.path, {
@@ -103,7 +112,21 @@ export const updateUserController = async (req, res) => {
 
     try {
         await User.updatebyId({ id, data: newvalidate })
-        res.status(200).json({ message: 'update user' })
+        // Obtener el usuario actualizado
+        const updatedUser = await User.getById({ id })
+        // Devuelve el usuario actualizado (incluyendo la nueva URL de imagen)
+        const userPayload = {
+            firstName: updatedUser[0][0].firstName,
+            id: updatedUser[0][0].id,
+            email: updatedUser[0][0].email,
+            roleId: updatedUser[0][0].roleId,
+            img: updatedUser[0][0].img // Cambia 'url' por 'img' para ser consistente
+        }
+        // Solo devuelve el usuario actualizado, NO el accessToken
+        res.status(200).json({
+            message: 'update user',
+            user: userPayload
+        })
     } catch (error) {
         if (file && file.path && newvalidate.img && !newvalidate.img.startsWith('http')) {
             deletelinkFile({ path: file.path.split('\\').pop() })
