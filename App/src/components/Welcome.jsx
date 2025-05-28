@@ -2,7 +2,7 @@
 
 import styled from "styled-components"
 import Logout from "./Logout"
-import { Settings } from "lucide-react" // Cambia Shield por Settings
+import { Settings } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 import { useAuth } from "../hooks/useAuth"
 
