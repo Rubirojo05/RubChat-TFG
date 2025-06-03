@@ -96,7 +96,6 @@ describe("ChatContainer", () => {
         render(<ChatContainer {...baseProps} />)
         fireEvent.click(screen.getByText("Enviar"))
         fireEvent.click(screen.getByText("Typing"))
-        // No hay expect aquí porque los mocks están en el propio ChatInput simulado
     })
 
     it("muestra el indicador de escribiendo cuando isTyping es true", async () => {

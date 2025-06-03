@@ -61,7 +61,7 @@ export const updateUserController = async (req, res) => {
     if (roleId !== undefined) newvalidate.roleId = Number(roleId)
     if (email) newvalidate.email = email
 
-    // --- AÑADIDO: Si hay archivo, añade el objeto img para la validación ---
+    // Si hay archivo, añade el objeto img para la validación 
     const file = req.files?.img ? req.files.img : undefined
     if (file) {
         newvalidate.img = {
@@ -120,7 +120,7 @@ export const updateUserController = async (req, res) => {
             id: updatedUser[0][0].id,
             email: updatedUser[0][0].email,
             roleId: updatedUser[0][0].roleId,
-            img: updatedUser[0][0].img // Cambia 'url' por 'img' para ser consistente
+            img: updatedUser[0][0].img
         }
         // Solo devuelve el usuario actualizado, NO el accessToken
         res.status(200).json({

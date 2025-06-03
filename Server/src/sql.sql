@@ -1,5 +1,3 @@
--- Active: 1686084594206@@127.0.0.1@3306@chat
-
 #Se crea la base de datos
 
 CREATE DATABASE IF NOT EXISTS chat;

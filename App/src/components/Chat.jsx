@@ -52,7 +52,6 @@ const Chat = () => {
     return () => window.removeEventListener("resize", checkIfMobile)
   }, [])
 
-  // --- CORRECCIÓN: Mantener onlineUsers actualizado siempre ---
   useEffect(() => {
     if (!auth?.accessToken) return
     // Si ya hay una conexión previa, la cerramos antes de crear una nueva

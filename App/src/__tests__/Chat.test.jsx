@@ -89,7 +89,6 @@ describe("Chat", () => {
         render(<Chat />)
         const pepe = await screen.findByText("Pepe")
         fireEvent.click(pepe)
-        // No hay expect directo, pero no debe romper ni lanzar error
     })
 
     it("muestra el overlay y el menú móvil cuando showMobileMenu es true", async () => {
