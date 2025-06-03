@@ -16,7 +16,7 @@ const Info = () => {
                     ¿Por qué RubChat?
                 </SectionTitle>
                 <SectionText>
-                    RubChat surge como el Trabajo de Fin de Grado Superior de Desarrollo de Aplicaciones Web. Es el resultado de meses de aprendizaje, retos y pasión por la tecnología.
+                    RubChat surge como el Trabajo de Desarrollo de Aplicaciones Web. Es el resultado de meses de aprendizaje, retos y pasión por la tecnología.
                 </SectionText>
             </Section>
             <Section>
